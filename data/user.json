@@ -1,0 +1,9 @@
+{
+  "name": { "first": "John", "last": "Doe" },
+  "email": "johndoe@gmail.com",
+  "preferences": {
+    "theme": "dark"
+  },
+  "dictionary": {},
+  "keywords": {}
+}

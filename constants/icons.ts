@@ -1,0 +1,58 @@
+const icons = {
+  home: {
+    filled: require("../assets/images/home-filled.png"),
+    outlined: require("../assets/images/home-outlined.png"),
+  },
+  add: require("../assets/images/add.png"),
+  avatar: require("../assets/images/avatar.png"),
+  collection: require("../assets/images/add-folder.png"),
+  budget: {
+    filled: require("../assets/images/budget-filled.png"),
+    outlined: require("../assets/images/budget-outlined.png"),
+  },
+  check: require("../assets/images/check.png"),
+  checkbox: {
+    checked: require("../assets/images/checkbox-checked.png"),
+    unchecked: require("../assets/images/checkbox-unchecked.png"),
+  },
+  chevron: require("../assets/images/chevron.png"),
+  copy: require("../assets/images/copy.png"),
+  date: require("../assets/images/date.png"),
+  delete: require("../assets/images/delete.png"),
+  download: require("../assets/images/download.png"),
+  edit: require("../assets/images/edit.png"),
+  error: require("../assets/images/error.png"),
+  expenses: {
+    filled: require("../assets/images/expenses-filled.png"),
+    outlined: require("../assets/images/expenses-outlined.png"),
+  },
+  export: require("../assets/images/export.png"),
+  folder: require("../assets/images/folder.png"),
+  history: require("../assets/images/history.png"),
+  image: require("../assets/images/image.png"),
+  import: require("../assets/images/import.png"),
+  info: require("../assets/images/info.png"),
+  link: require("../assets/images/link.png"),
+  logout: require("../assets/images/logout.png"),
+  money: require("../assets/images/money.png"),
+  move: require("../assets/images/move.png"),
+  notification: require("../assets/images/notification.png"),
+  pieChart: require("../assets/images/pie-chart.png"),
+  radio: {
+    checked: require("../assets/images/radio-checked.png"),
+    unchecked: require("../assets/images/radio-unchecked.png"),
+  },
+  receipt: require("../assets/images/receipt.png"),
+  restore: require("../assets/images/restore.png"),
+  arrow: require("../assets/images/arrow.png"),
+  search: require("../assets/images/search.png"),
+  select: require("../assets/images/select.png"),
+  statistics: {
+    filled: require("../assets/images/statistics-filled.png"),
+    outlined: require("../assets/images/statistics-outlined.png"),
+  },
+  success: require("../assets/images/success.png"),
+  warning: require("../assets/images/warning.png"),
+};
+
+export default icons;

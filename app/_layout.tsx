@@ -1,29 +1,30 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { ThemeWrapper } from "@/context/themeContext";
+import {
+  Urbanist_200ExtraLight,
+  Urbanist_400Regular,
+  Urbanist_500Medium,
+  Urbanist_700Bold,
+} from "@expo-google-fonts/urbanist";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import "./globals.css";
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    Urbanist_200ExtraLight,
+    Urbanist_400Regular,
+    Urbanist_500Medium,
+    Urbanist_700Bold,
   });
 
   if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
+    return false;
   }
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeWrapper>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
+        <Stack.Screen name="(pages)" options={{ headerShown: false }} />
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    </ThemeWrapper>
   );
 }
