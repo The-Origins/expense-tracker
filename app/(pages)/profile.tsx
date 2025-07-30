@@ -5,7 +5,7 @@ import icons from "@/constants/icons";
 import { useThemeContext } from "@/context/themeContext";
 import { Link, useRouter } from "expo-router";
 import React, { useMemo } from "react";
-import { Image, Pressable, ScrollView, Switch, Text, View } from "react-native";
+import { Pressable, ScrollView, Switch, Text, View } from "react-native";
 
 const Profile = () => {
   const router = useRouter();
@@ -26,30 +26,12 @@ const Profile = () => {
             />
           </Pressable>
           <ThemedText className=" font-urbanistBold text-[2rem] ">
-            Profile
+            Preferences
           </ThemedText>
         </View>
       </View>
       <ScrollView>
         <View className=" flex-1 flex-col gap-[30px] pt-[40px] pb-[20px] ">
-          <View className=" p-[20px] bg-primary rounded-[20px] flex-row gap-[10px] items-center ">
-            <View className=" h-[40px] w-[40px] bg-paper-light rounded-[20px] flex-row justify-center items-center">
-              <Image source={icons.avatar} className="w-[20px] h-[20px]" />
-            </View>
-            <View className=" flex-1 flex-col ">
-              <Text className=" font-urbanistBold text-[1.5rem] ">
-                John Doe
-              </Text>
-              <Text>johndoe@gmail.com</Text>
-            </View>
-            <Pressable className=" flex-row justify-center items-center h-[30px] w-[30px] bg-black rounded-[15px] ">
-              <Image
-                source={icons.logout}
-                className=" ml-[4px] w-[15px] h-[15px]"
-                tintColor={tintColors.light}
-              />
-            </Pressable>
-          </View>
           <View className=" flex-col gap-[10px] ">
             <ThemedText className=" font-urbanistBold text-[1.2rem] ">
               Data
@@ -77,7 +59,7 @@ const Profile = () => {
           </View>
           <View className=" flex-col gap-[10px] ">
             <ThemedText className=" font-urbanistBold text-[1.2rem] ">
-              Preferences
+              Settings
             </ThemedText>
             <View className=" p-[10px]  bg-paper-light flex-col gap-[20px] rounded-[20px] dark:bg-paper-dark ">
               <View className=" flex-row justify-between items-center ">
@@ -110,7 +92,7 @@ const Profile = () => {
               Dictionary
             </ThemedText>
             <View className=" p-[20px]  pl-[10px] pr-[10px]  bg-paper-light flex-col gap-[20px] rounded-[20px] dark:bg-paper-dark ">
-              <Link href="/dictionary" asChild>
+              <Link href="/dictionary/main" asChild>
                 <Pressable className=" flex-row items-center gap-1 ">
                   <View className=" flex-1 flex-col gap-1">
                     <ThemedText className=" text-[1.1rem] font-urbanistMedium ">

@@ -73,14 +73,6 @@ export type BudgetForm = {
   title: string;
   start: Date;
   end: Date;
-  repeat: boolean;
-};
-
-export type DictionaryEntryType = {
-  keyword?: string;
-  recipient?: string;
-  title?: string;
-  category?: string;
 };
 
 export type Statistic = {
@@ -97,12 +89,12 @@ export type Budget = {
   title: string;
   total: number;
   current: number;
-  repeat: boolean;
+  itemsTotal: number;
 };
 
 export type BudgetItem = {
   id: string;
-  budgetId?: string;
+  budgetId: string;
   category: string;
   total: number;
   current: number;
@@ -116,9 +108,12 @@ export type DictionaryItem = {
   category?: string;
 };
 
-export type KEYWORD = {
+export type Notification = {
   id: string;
-  recipient: string;
-  title?: string;
-  category?: string;
+  type: "info" | "error";
+  path: string;
+  title: string;
+  message: string;
+  date: string;
+  unread: boolean;
 };

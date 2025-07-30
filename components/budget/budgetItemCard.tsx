@@ -1,4 +1,4 @@
-import { colorCycle } from "@/constants/colorSettings";
+import { colorCycle, getPercentColor } from "@/constants/colorSettings";
 import { BudgetItem } from "@/constants/common";
 import icons from "@/constants/icons";
 import React, { useMemo } from "react";
@@ -10,6 +10,7 @@ import ThemedText from "../themedText";
 const BudgetItemCard = ({
   index,
   item,
+  expired,
   selectMode,
   selected,
   handleSelect,
@@ -17,6 +18,7 @@ const BudgetItemCard = ({
 }: {
   index: number;
   item: BudgetItem;
+  expired?: boolean;
   selectMode: boolean;
   selected: Set<string>;
   handleSelect: (id: string, action: "add" | "delete") => void;
@@ -31,7 +33,7 @@ const BudgetItemCard = ({
     [item.current, item.total]
   );
 
-  const isPaper = useMemo(() => index % 4 === 3, [index]);
+  const percentColor = useMemo(() => getPercentColor(percent), [percent]);
 
   const handlePress = () => {
     if (selectMode) {
@@ -46,59 +48,82 @@ const BudgetItemCard = ({
       handleSelect(item.id, "add");
     }
   };
-
+  console.log(percentColor);
   return (
     <Pressable
       onPress={handlePress}
       onLongPress={handleLongPress}
-      className={` flex-col p-[20px] rounded-[20px] bg-${colorCycle[(index % 4) as keyof typeof colorCycle]} ${isPaper ? "dark:bg-paper-dark" : ""} `}
+      className={` flex-col p-[20px] rounded-[20px] ${expired ? "bg-paper-light dark:bg-paper-dark" : `bg-${colorCycle[(index % 3) as keyof typeof colorCycle]}`} `}
     >
       {selectMode && (
         <ThemedIcon
-          toggleOnDark={isPaper}
+          toggleOnDark={false}
           source={icons.checkbox[picked ? "checked" : "unchecked"]}
           className=" w-[15px] h-[15px] "
         />
       )}
       <View className=" flex-row gap-1 items-center ">
-        <View className=" flex-1 flex-col gap-2 ">
+        <View className=" flex-1 flex-col gap-1 ">
           <ThemedText
-            toggleOnDark={isPaper}
-            className=" font-urbanistMedium text-[1.2rem] capitalize "
+            toggleOnDark={false}
+            className={` font-urbanistMedium text-[1.3rem] capitalize ${expired ? "text-divider" : ""} `}
           >
             {item.category}
           </ThemedText>
           <ThemedText
-            toggleOnDark={isPaper}
-            className=" font-urbanistBold text-[1.5rem] "
+            toggleOnDark={false}
+            className={` font-urbanistBold text-[1.5rem] ${expired ? "text-divider" : ""} `}
           >
             {item.total}
           </ThemedText>
-          <ThemedText toggleOnDark={false} className=" text-divider ">
+          <ThemedText
+            toggleOnDark={false}
+            className={percentColor.class || "text-divider"}
+          >
+            <ThemedText
+              toggleOnDark={false}
+              className={` ${percentColor.class || "text-divider"} font-urbanistBold `}
+            >
+              Total:{" "}
+            </ThemedText>
             {item.current}
           </ThemedText>
         </View>
-        <View className=" relative">
-          <ProgressChart
-            data={{ data: [percent] }}
-            width={60}
-            height={60}
-            strokeWidth={10}
-            radius={25}
-            hideLegend={true}
-            chartConfig={{
-              backgroundColor: "#FFFFFF",
-              backgroundGradientFrom: "#FFFFFF",
-              backgroundGradientTo: "#FFFFFF",
-              backgroundGradientFromOpacity: 0,
-              backgroundGradientToOpacity: 0,
-              color: (opacity = 1) =>
-                `rgba(${isPaper ? "255,255,255" : "0, 0, 0"}, ${opacity * 1.5})`,
-            }}
-            style={{ backgroundColor: "transparent" }}
-          />
-          <View className=" absolute h-[100%] w-[100%] flex-row justify-center items-center">
-            <ThemedText toggleOnDark={isPaper}>{percent * 100}%</ThemedText>
+        <View className=" relative w-[60px] h-[60px] ">
+          {percent <= 1 ? (
+            <ProgressChart
+              data={{ data: [percent] }}
+              width={60}
+              height={60}
+              strokeWidth={10}
+              radius={25}
+              hideLegend={true}
+              chartConfig={{
+                backgroundColor: "#FFFFFF",
+                backgroundGradientFrom: "#FFFFFF",
+                backgroundGradientTo: "#FFFFFF",
+                backgroundGradientFromOpacity: 0,
+                backgroundGradientToOpacity: 0,
+                color: (opacity = 1) =>
+                  `rgba(${expired ? "128,128,128" : percentColor.chart}, ${opacity * 1.5})`,
+              }}
+            />
+          ) : (
+            <View
+              className={` w-[60px] h-[60px] rounded-[50%] ${expired ? "text-divider" : "bg-error"} `}
+            />
+          )}
+          <View className=" absolute h-[100%] w-[100%]  flex-row justify-center items-center">
+            <View
+              className={` flex-col justify-center items-center w-[40px] h-[40px] rounded-[50%] ${expired ? "bg-paper-light dark:bg-paper-dark" : `bg-${colorCycle[(index % 3) as keyof typeof colorCycle]}`} `}
+            >
+              <ThemedText
+                toggleOnDark={false}
+                className={`${expired ? "text-divider" : percentColor.class}`}
+              >
+                {percent <= 1 ? (percent * 100).toFixed(1) : ">100"}%
+              </ThemedText>
+            </View>
           </View>
         </View>
       </View>

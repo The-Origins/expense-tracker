@@ -38,46 +38,64 @@ export const init = async () => {
       total REAL NOT NULL
     );
 
-    INSERT INTO statistics (path, total) VALUES ('test', 20);
-
+    DROP TABLE dictionary;
     CREATE TABLE IF NOT EXISTS dictionary (
-        recipient TEXT PRIMARY KEY,
+        id TEXT,
+        recipient TEXT,
         title TEXT,
-        category TEXT
+        category TEXT,
+        PRIMARY KEY (id, recipient)
       );
     
-      CREATE TABLE IF NOT EXISTS keywords (
-        keyword TEXT PRIMARY KEY,
+      
+    DROP TABLE keywords;
+    CREATE TABLE IF NOT EXISTS keywords (
+        id TEXT,
+        keyword TEXT,
         title TEXT,
-        category TEXT
+        category TEXT,
+        PRIMARY KEY (id, keyword)
       );
 
-      DROP TABLE budget;
+      
       CREATE TABLE IF NOT EXISTS budgets (
         id TEXT PRIMARY KEY,
         title TEXT,
-        total REAL NOT NULL,
-        current REAL NOT NULL,
+        total REAL ,
+        current REAL ,
         start TEXT,
         end TEXT,
-        repeat BOOLEAN,
+        itemsTotal REAL
       );
 
-      DROP TABLE budget_items;
       CREATE TABLE IF NOT EXISTS budget_items (
         id TEXT,
         budgetId TEXT,
-        category TEXT NOT NULL,
-        total REAL NOT NULL,
-        current REAL NOT NULL
+        category TEXT ,
+        total REAL ,
+        current REAL ,
         PRIMARY KEY (id, budgetId)
       );
 
-      CREATE TABLE IF NOT EXISTS user (
-        id TEXT PRIMARY KEY,
-        name TEXT,
-        email TEXT
+      
+      CREATE TABLE IF NOT EXISTS preferences (
+        key TEXT PRIMARY KEY,
+        value TEXT
       );
+
+      DROP TABLE notifications;
+      CREATE TABLE IF NOT EXISTS notifications (
+      id TEXT PRIMARY KEY,
+      type TEXT,
+      path TEXT,
+      title TEXT,
+      message TEXT,
+      date TEXT,
+      unread BOOLEAN
+      );
+
+      INSERT INTO notifications (id,type,path,title,message,date,unread ) VALUES ('1','info','/expenses/display/collections','new expenses','5 new expenses added today','2025-07-30T05:54:18.926Z',true);
+      INSERT INTO notifications (id,type,path,title,message,date,unread ) VALUES ('2','error','/expenses/display/collections','failed expenses','2 expenses failed','2025-07-30T06:54:18.926Z',false);
       `);
     console.log("end");
   } catch (error) {

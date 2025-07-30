@@ -1,7 +1,7 @@
 import { tintColors } from "@/constants/colorSettings";
 import React from "react";
 import { Text, TextInput, TextInputProps, View } from "react-native";
-import ThemedText from "../themedText";
+import ThemedText from "./themedText";
 
 const InputField = ({
   name,
@@ -41,7 +41,7 @@ const InputField = ({
           onBlur={() => handleBlur(name)}
           placeholderTextColor={tintColors.divider}
           {...props}
-          className={` capitalize p-[10px] rounded-[10px] border focus:border-black ${!!error && touched ? "border-error" : changed ? " border-info" : "border-divider"} dark:color-white dark:focus:border-white ${props.className} `}
+          className={` p-[10px] rounded-[10px] border focus:border-black ${!!error && touched ? "border-error" : changed ? " border-info" : "border-divider"} dark:color-white dark:focus:border-white ${props.className} `}
         />
         {error && touched ? (
           <Text className=" text-[0.9rem] text-error ml-[10px]  ">

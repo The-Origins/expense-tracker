@@ -1,7 +1,8 @@
-import { Expense } from "@/constants/common";
+import { DictionaryItem, Expense } from "@/constants/common";
 import db from "@/db/schema";
 import { nanoid } from "nanoid/non-secure";
 import { normalizeString } from "./appUtils";
+import { updateBudgetsAndItems } from "./budgetUtils";
 import { addToCollection, removeFromCollection } from "./collectionsUtils";
 import { updateStatistics } from "./statisticsUtils";
 
@@ -232,7 +233,7 @@ export const updateExpense = async (
       );
     }
   }
-  console.log("prev: ", previousExpense, "new: ", expense);
+
   if (!isTrash && !isFailed) {
     if (
       mode === "delete" ||
@@ -242,8 +243,10 @@ export const updateExpense = async (
           previousExpense.title ||
           previousExpense.category))
     ) {
-      console.log("deleted");
       updateStatistics(previousExpense || expense, operations, "delete");
+      operations.push(
+        updateBudgetsAndItems(previousExpense || expense, "delete")
+      );
     }
 
     if (
@@ -252,8 +255,10 @@ export const updateExpense = async (
         previousExpense &&
         (expense.amount || expense.title || expense.category))
     ) {
-      console.log("added");
       updateStatistics({ ...previousExpense, ...expense }, operations);
+      operations.push(
+        updateBudgetsAndItems({ ...previousExpense, ...expense }, "add")
+      );
     }
   }
   await Promise.all(operations);
@@ -383,45 +388,46 @@ const parseReceipt = (receipt: string) => {
 };
 
 export const fetchExpenseInfo = async (recipient?: string) => {
+  let title: string | undefined = "";
+  let category: string | undefined = "unknown";
   if (!recipient) {
-    return { title: "", category: "unknown" };
+    return { title, category };
   }
 
-  const dictionaryResult: any = await db.getFirstAsync(
+  const dictionaryResult: DictionaryItem | null = await db.getFirstAsync(
     "SELECT * FROM dictionary WHERE recipient = ? ",
     recipient
   );
 
   if (dictionaryResult) {
-    return {
-      title: dictionaryResult.title,
-      category: dictionaryResult.category,
-    };
-  }
-
-  const keywordResult: any = await db.getFirstAsync(
-    "SELECT * FROM keywords WHERE ? LIKE '%' || keyword || '%';",
-    recipient
-  );
-
-  if (keywordResult) {
-    return {
-      title: keywordResult.title,
-      category: keywordResult.category,
-    };
-  }
-
-  let accountIndex = recipient.indexOf("for account");
-  let title = "";
-
-  if (accountIndex !== -1) {
-    accountIndex += 12;
-    title = recipient.substring(accountIndex);
+    title = dictionaryResult.title;
+    category = dictionaryResult.category;
   } else {
-    title = recipient.split(" ").slice(0, 2).join(" ");
+    const keywordResult: DictionaryItem | null = await db.getFirstAsync(
+      "SELECT * FROM keywords WHERE ? LIKE '%' || keyword || '%';",
+      recipient
+    );
+
+    if (keywordResult) {
+      title = keywordResult.title;
+      category = keywordResult.category;
+    }
   }
+
+  if (!title) {
+    let accountIndex = recipient.indexOf("for account");
+    if (accountIndex !== -1) {
+      accountIndex += 12;
+      title = recipient.substring(accountIndex);
+    } else {
+      title = recipient.split(" ").slice(0, 2).join(" ");
+    }
+  }
+
+  category = category || "unknown";
+
   return {
     title,
-    category: "unknown",
+    category,
   };
 };

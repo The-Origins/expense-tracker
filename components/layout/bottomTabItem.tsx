@@ -15,7 +15,7 @@ const paths: Record<string, Href> = {
     pathname: "/statistics/main",
     params: { year: "2025", month: "2", day: "12" },
   },
-  budget: "/budget",
+  budget: "/(pages)/budget/display/all",
 };
 
 const BottomTabItem = ({

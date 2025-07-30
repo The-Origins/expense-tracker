@@ -1,9 +1,8 @@
-import AutoComplete from "@/components/edit/autoComplete";
-import InputField from "@/components/edit/inputField";
+import InputField from "@/components/inputField";
 import StatusModal from "@/components/statusModal";
 import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";
-import { Budget, BudgetForm, Status } from "@/constants/common";
+import { Budget, BudgetForm, BudgetItem, Status } from "@/constants/common";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
 import { normalizeString } from "@/lib/appUtils";
@@ -16,39 +15,29 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Platform, Pressable, ScrollView, View } from "react-native";
 
-const EditBudget = () => {
+const EditMain = () => {
   const { mode } = useLocalSearchParams();
   const router = useRouter();
-  const appProps = useAppProps();
 
-  const { budgetIndex, budgets, setBudgets } = useMemo<{
+  const { budgetIndex, budgets, setBudgets, setCategories } = useAppProps() as {
     budgetIndex: number;
     budgets: Budget[] | null;
     setBudgets: React.Dispatch<React.SetStateAction<Budget[] | null>>;
-  }>(
-    () => ({
-      budgetIndex: appProps.budgetIndex,
-      budgets: appProps.budgets,
-      setBudgets: appProps.setBudgets,
-    }),
-    [appProps]
-  );
+    setCategories: React.Dispatch<
+      React.SetStateAction<Map<string, BudgetItem[]>>
+    >;
+  };
 
   const budget = useMemo<Partial<Budget>>(
-    () => (budgets && budgets[budgetIndex]) || {},
+    () => (mode === "edit" && budgets && budgets[budgetIndex]) || {},
     [budgetIndex, budgets]
   );
 
   const [form, setForm] = useState<BudgetForm>({
     total: "",
-    title: "this year",
-    end: new Date(
-      new Date(new Date().getFullYear(), 11, 31).setHours(0, 0, 0, 0)
-    ),
-    start: new Date(
-      new Date(new Date().getFullYear(), 0, 1).setHours(0, 0, 0, 0)
-    ),
-    repeat: true,
+    title: "This year",
+    end: new Date(Date.UTC(new Date().getFullYear(), 11, 32)),
+    start: new Date(Date.UTC(new Date().getFullYear(), 0, 1)),
   });
 
   const [errors, setErrors] = useState({
@@ -56,9 +45,9 @@ const EditBudget = () => {
     title: "",
   });
   const [touched, setTouched] = useState<Set<string>>(new Set());
-  const [changes, setChanges] = useState<
-    Map<string, string | boolean | number>
-  >(new Map());
+  const [changes, setChanges] = useState<Map<string, string | number>>(
+    new Map()
+  );
   const [datePicker, setDatePicker] = useState<{
     open: boolean;
     type: "end" | "start";
@@ -78,11 +67,10 @@ const EditBudget = () => {
       title: budget.title || prev.title,
       start: budget.start ? new Date(budget.start) : prev.start,
       end: budget.end ? new Date(budget.end) : prev.end,
-      repeat: budget.repeat || prev.repeat,
     }));
 
     setErrors({
-      title: budget.title ? "" : "required",
+      title: "",
       total: budget.total ? "" : "required",
     });
 
@@ -102,11 +90,6 @@ const EditBudget = () => {
         newMap.set("title", "this year");
       } else {
         newMap.delete("title");
-      }
-      if (!budget.repeat) {
-        newMap.set("repeat", true);
-      } else {
-        newMap.delete("repeat");
       }
       return newMap;
     });
@@ -130,7 +113,7 @@ const EditBudget = () => {
     setErrors((prev) => ({
       ...prev,
       [name]: validateInput(
-        name,
+        name === "total" ? "amount" : name,
         value,
         form,
         true,
@@ -142,9 +125,6 @@ const EditBudget = () => {
       ...prev,
       [name]: value,
     }));
-    if (name === "title") {
-      handleTitleChange(formatedValue);
-    }
   };
   const handleBlur = (name: string) => {
     setTouched((prev) => {
@@ -155,12 +135,14 @@ const EditBudget = () => {
   };
   const handleDateChange = (event: DateTimePickerEvent, newDate?: Date) => {
     setDatePicker((prev) => ({ ...prev, open: Platform.OS === "ios" }));
-    console.log("new date: ", newDate);
     if (newDate) {
+      const utcDate = new Date(
+        Date.UTC(newDate.getFullYear(), newDate.getMonth(), newDate.getDate())
+      );
       setChanges((prev) => {
         const newMap = new Map(prev);
-        if (newDate !== form[datePicker.type]) {
-          newMap.set(datePicker.type, newDate.toISOString());
+        if (utcDate.toISOString() !== budget[datePicker.type]) {
+          newMap.set(datePicker.type, utcDate.toISOString());
         } else {
           newMap.delete(datePicker.type);
         }
@@ -172,31 +154,6 @@ const EditBudget = () => {
         [datePicker.type]: newDate,
       }));
     }
-  };
-
-  const handleTitleChange = (title: string) => {
-    let startDate = form.start;
-    let endDate = form.end;
-    let now = new Date();
-    switch (title) {
-      case "this year":
-        startDate = new Date(now.getFullYear(), 0, 1);
-        endDate = new Date(now.getFullYear(), 11, 31);
-        break;
-      case "this month":
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        break;
-      case "this week":
-        startDate = now;
-        endDate = now;
-        startDate.setDate(now.getDate() - now.getDay());
-        endDate.setDate(startDate.getDate() + 6);
-
-      default:
-        break;
-    }
-    setForm((prev) => ({ ...prev, start: startDate, end: endDate }));
   };
 
   const openDatePicker = (type: "end" | "start") => {
@@ -219,38 +176,55 @@ const EditBudget = () => {
       setTouched(new Set(["title", "total"]));
     } else {
       if (changes.size) {
-        setStatus({
-          open: true,
-          type: "loading",
-          title: mode === "edit" ? "Updating" : "Adding",
-          message: `${mode === "edit" ? "updating" : "adding"} budget`,
-          handleClose: handleStatusClose,
-          action: {
-            callback() {},
-          },
-        });
-        if (changes.has("start") || changes.has("end")) {
-          changes.set("start", form.start.toISOString());
-          changes.set("end", form.end.toISOString());
-        }
-        const change: Partial<Budget> = Object.fromEntries(changes);
-
-        if (mode === "edit" && budget) {
-          await updateBudget({ ...change }, "update");
-          setBudgets((prev) => {
-            if (prev) {
-              prev[budgetIndex] = { ...budget, ...change } as Budget;
-            }
-            return prev;
+        try {
+          setStatus({
+            open: true,
+            type: "loading",
+            title: mode === "edit" ? "Updating" : "Adding",
+            message: `${mode === "edit" ? "updating" : "adding"} budget`,
+            handleClose: handleStatusClose,
+            action: {
+              callback() {},
+            },
           });
-        } else {
-          const newBudget = await updateBudget({ ...change }, "add");
-          if (budgets) {
-            setBudgets([newBudget as Budget, ...budgets]);
+          if (changes.has("start") || changes.has("end")) {
+            changes.set("start", form.start.toISOString());
+            changes.set("end", form.end.toISOString());
+            setCategories((prev) => {
+              const newMap = new Map(prev);
+              newMap.delete(budget.id || "");
+              return newMap;
+            });
           }
+          const change: Partial<Budget> = Object.fromEntries(changes);
+
+          if (mode === "edit" && budget) {
+            change.id = budget.id;
+            const newBudget = await updateBudget({ ...change }, "update");
+            setBudgets((prev) => {
+              if (prev) {
+                prev[budgetIndex] = { ...budget, ...newBudget } as Budget;
+              }
+              return prev;
+            });
+          } else {
+            const newBudget = await updateBudget({ ...change }, "add");
+            if (budgets) {
+              setBudgets([newBudget as Budget, ...budgets]);
+            }
+          }
+          handleStatusClose();
+          router.back();
+        } catch (error) {
+          setStatus({
+            open: true,
+            type: "error",
+            message: "There was an error while updating budget",
+            handleClose: handleStatusClose,
+            action: { callback: handleStatusClose },
+          });
+          console.error(error);
         }
-        handleStatusClose();
-        router.back();
       }
     }
   };
@@ -285,6 +259,7 @@ const EditBudget = () => {
             <View className=" p-[20px] bg-paper-light rounded-[20px] flex-col gap-[20px] dark:bg-paper-dark ">
               <InputField
                 name="total"
+                value={form.total}
                 label="Amount"
                 placeholder="e.g $50,000"
                 handleBlur={handleBlur}
@@ -294,14 +269,14 @@ const EditBudget = () => {
                 changed={changes.has("total")}
                 keyboardType="numeric"
               />
-              <AutoComplete
+              <InputField
                 name="title"
                 value={form.title}
                 error={errors.title}
+                handleChange={handleChange}
+                handleBlur={handleBlur}
                 touched={touched.has("title")}
                 changed={changes.has("title")}
-                onChange={handleChange}
-                options={["this year", "this month", "this week"]}
               />
               <View className=" flex-row gap-[20px] ">
                 <View className=" flex-1 flex-col gap-[10px] ">
@@ -323,24 +298,10 @@ const EditBudget = () => {
                     onPress={() => openDatePicker("end")}
                     className={` p-[10px] rounded-[10px] border ${changes.has("end") ? "border-info" : "border-black dark:border-white"}`}
                   >
-                    <ThemedText>{form.start.toDateString()}</ThemedText>
+                    <ThemedText>{form.end.toDateString()}</ThemedText>
                   </Pressable>
                 </View>
               </View>
-              <Pressable
-                onPress={() =>
-                  setForm((prev) => ({ ...prev, repeat: !prev.repeat }))
-                }
-                className=" flex-row items-center gap-2 "
-              >
-                <ThemedIcon
-                  source={icons.checkbox[form.repeat ? "checked" : "unchecked"]}
-                  className=" w-[20px] h-[20px] "
-                />
-                <ThemedText className=" font-urbanistMedium ">
-                  Repeat
-                </ThemedText>
-              </Pressable>
             </View>
           </View>
         </ScrollView>
@@ -358,4 +319,4 @@ const EditBudget = () => {
   );
 };
 
-export default EditBudget;
+export default EditMain;

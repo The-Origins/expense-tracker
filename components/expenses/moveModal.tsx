@@ -6,7 +6,7 @@ import { createCollection } from "@/lib/collectionsUtils";
 import validateInput from "@/lib/validateInput";
 import React, { useEffect, useMemo, useState } from "react";
 import { Image, Modal, Pressable, ScrollView, View } from "react-native";
-import InputField from "../edit/inputField";
+import InputField from "../inputField";
 import ThemedIcon from "../themedIcon";
 import ThemedText from "../themedText";
 

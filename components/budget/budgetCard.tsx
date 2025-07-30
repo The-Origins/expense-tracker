@@ -1,7 +1,8 @@
-import { colorCycle } from "@/constants/colorSettings";
+import { colorCycle, getPercentColor } from "@/constants/colorSettings";
 import { Budget } from "@/constants/common";
 import icons from "@/constants/icons";
-import React, { useMemo } from "react";
+import dayjs from "dayjs";
+import React, { useEffect, useMemo } from "react";
 import { Image, Pressable, View } from "react-native";
 import { ProgressChart } from "react-native-chart-kit";
 import ThemedText from "../themedText";
@@ -14,6 +15,7 @@ const BudgetCard = ({
   selected,
   handleSelect,
   handleNavigate,
+  onExpire,
 }: {
   index: number;
   budget: Budget;
@@ -22,15 +24,19 @@ const BudgetCard = ({
   selected?: Set<string>;
   handleSelect?: (id: string, action: "add" | "delete") => void;
   handleNavigate: (index: number, mode: "edit" | "details") => void;
+  onExpire: (index: number) => void;
 }) => {
-  const expired = useMemo(
+  const expired = useMemo<boolean>(
     () => new Date().toISOString() > budget.end,
-    [budget.end]
+    [budget]
   );
   const picked = useMemo<boolean>(
     () => !!budget.id && !!selected && selected.has(budget.id),
     [selected]
   );
+  const percent = useMemo(() => budget.current / budget.total, [budget]);
+  const percentColor = useMemo(() => getPercentColor(percent), [percent]);
+
 
   const handlePress = () => {
     if (selectMode && handleSelect) {
@@ -51,64 +57,90 @@ const BudgetCard = ({
     <Pressable
       onPress={handlePress}
       onLongPress={handleLongPress}
-      className={` relative p-[20px] pt-[30px] pb-[30px] rounded-[20px] flex-row ${expired ? "bg-paper-light dark:bg-paper-dark" : `bg-${colorCycle[(index % 3) as keyof typeof colorCycle]}`} `}
+      className={` p-[20px] rounded-[20px] flex-col ${expired ? "bg-paper-light dark:bg-paper-dark" : `bg-${colorCycle[(index % 3) as keyof typeof colorCycle]}`} `}
     >
       <View className=" flex-row justify-between items-center ">
         <View>
-          {selectMode && (
+          {!!selectMode && (
             <Image
               source={icons.checkbox[picked ? "checked" : "unchecked"]}
               className=" w-[20px] h-[20px] "
             />
           )}
         </View>
-        {budget.repeat && (
-          <Image
-            style={{ zIndex: 2 }}
-            source={icons.history}
-            className=" absolute right-5 top-3 w-[15px] h-[15px] "
-          />
-        )}
       </View>
-      <View className=" flex-row gap-1 ">
+      <View className=" flex-row gap-2 ">
         <View className=" relative flex-1 flex-col gap-2 justify-center items-start ">
           <ThemedText
             toggleOnDark={false}
-            className=" font-urbanistMedium text-[1.2rem] "
+            className={` capitalize font-urbanistMedium text-[1.3rem] ${expired ? "text-divider" : ""} `}
           >
             {budget.title}
           </ThemedText>
-          <ThemedText
-            toggleOnDark={false}
-            className=" font-urbanistBold text-[2rem] "
-          >
-            {budget.total}
-          </ThemedText>
+          <View>
+            <ThemedText
+              toggleOnDark={false}
+              className={` font-urbanistBold text-[2rem] ${expired ? "text-divider" : ""} `}
+            >
+              {budget.total}
+            </ThemedText>
+            {editMode && (
+              <ThemedText
+                toggleOnDark={false}
+                className={`${percentColor.class}`}
+              >
+                <ThemedText
+                  toggleOnDark={false}
+                  className={` font-urbanistBold ${expired ? "text-divider" : percentColor.class} `}
+                >
+                  Total:{" "}
+                </ThemedText>
+                {budget.current}
+              </ThemedText>
+            )}
+          </View>
           <View>
             <ThemedText toggleOnDark={false} className=" text-divider ">
-              {budget.start} - {budget.end}
+              {dayjs(new Date(budget.start)).format("DD MMM YYYY")} -{" "}
+              {dayjs(new Date(budget.end)).format("DD MMM YYYY")}
             </ThemedText>
           </View>
         </View>
         <View className=" relative">
-          <ProgressChart
-            data={{ data: [0.7] }}
-            width={110}
-            height={110}
-            strokeWidth={20}
-            radius={45}
-            hideLegend={true}
-            chartConfig={{
-              backgroundColor: "#FFFFFF",
-              backgroundGradientFrom: "#FFFFFF",
-              backgroundGradientTo: "#FFFFFF",
-              backgroundGradientFromOpacity: 0,
-              backgroundGradientToOpacity: 0,
-              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity * 1.5})`,
-            }}
-          />
+          {percent <= 1 ? (
+            <ProgressChart
+              data={{ data: [percent] }}
+              width={100}
+              height={100}
+              strokeWidth={20}
+              radius={40}
+              hideLegend={true}
+              chartConfig={{
+                backgroundColor: "#FFFFFF",
+                backgroundGradientFrom: "#FFFFFF",
+                backgroundGradientTo: "#FFFFFF",
+                backgroundGradientFromOpacity: 0,
+                backgroundGradientToOpacity: 0,
+                color: (opacity = 1) =>
+                  `rgba(${expired ? "128,128,128" : percentColor.chart}, ${opacity * 1.5})`,
+              }}
+            />
+          ) : (
+            <View
+              className={` w-[100px] h-[100px] rounded-[50%] ${expired ? "text-divider" : "bg-error"} `}
+            ></View>
+          )}
           <View className=" absolute h-[100%] w-[100%] flex-row justify-center items-center">
-            <ThemedText toggleOnDark={false}>70%</ThemedText>
+            <View
+              className={`flex-col gap-1 items-center justify-center w-[60px] h-[60px] rounded-[50%] ${expired ? "bg-paper-light dark:bg-paper-dark" : `bg-${colorCycle[(index % 3) as keyof typeof colorCycle]}`} `}
+            >
+              <ThemedText
+                toggleOnDark={false}
+                className={`${percentColor.class}`}
+              >
+                {percent <= 1 ? (percent * 100).toFixed(1) : ">100"}%
+              </ThemedText>
+            </View>
           </View>
         </View>
       </View>

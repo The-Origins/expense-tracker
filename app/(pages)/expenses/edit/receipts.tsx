@@ -1,4 +1,4 @@
-import InputField from "@/components/edit/inputField";
+import InputField from "@/components/inputField";
 import StatusModal from "@/components/statusModal";
 import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";

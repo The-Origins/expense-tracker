@@ -3,7 +3,7 @@ import { normalizeString } from "@/lib/appUtils";
 import validateInput from "@/lib/validateInput";
 import React, { useState } from "react";
 import { Modal, Pressable, View } from "react-native";
-import InputField from "../edit/inputField";
+import InputField from "../inputField";
 import ThemedIcon from "../themedIcon";
 import ThemedText from "../themedText";
 

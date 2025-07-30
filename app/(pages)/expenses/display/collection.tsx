@@ -130,7 +130,7 @@ const Collection = () => {
 
   const handleItemEdit = (index: number) => {
     setExpenseIndex(index);
-    router.navigate({
+    router.push({
       pathname: "/expenses/edit/expense",
       params: { mode: "edit" },
     });

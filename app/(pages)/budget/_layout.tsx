@@ -4,12 +4,14 @@ import { Slot } from "expo-router";
 import React, { useState } from "react";
 
 const BudgetLayout = () => {
-  const [budgets, setBudgets] = useState<Budget[] | null>(null);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
   const [categories, setCategories] = useState<Map<string, BudgetItem[]>>(
     new Map()
   );
   const [budgetIndex, setBudgetIndex] = useState<number>(0);
   const [categoryIndex, setCategoryIndex] = useState<number>(0);
+  const [triggerFetch, setTriggerFetch] = useState<boolean>(true);
+
   return (
     <AppPropsProvider
       value={{
@@ -21,6 +23,8 @@ const BudgetLayout = () => {
         setBudgetIndex,
         categoryIndex,
         setCategoryIndex,
+        triggerFetch,
+        setTriggerFetch,
       }}
     >
       <Slot />

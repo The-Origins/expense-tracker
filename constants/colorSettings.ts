@@ -1,4 +1,4 @@
-export const colorCycle = {
+export const colorCycle:Record<number,string> = {
   0: "primary",
   1: "secondary",
   2: "accent",
@@ -20,4 +20,19 @@ export const tintColors = {
     light: "#EFEFEF",
     dark: "#252525",
   },
+};
+
+export const getPercentColor = (percent: number) => {
+  let colors = { class: "", chart: "0, 0, 0" };
+
+  if (percent >= 0.9) {
+    colors.class = "text-error";
+    colors.chart = "255, 61, 0";
+  }
+  else if (percent > 0.75) {
+    colors.class = "text-warning";
+    colors.chart = "255, 145, 0";
+  }
+
+  return colors;
 };

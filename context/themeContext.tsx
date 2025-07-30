@@ -1,4 +1,5 @@
 import { init } from "@/db/schema";
+import { getPreferences, setPreferences } from "@/lib/preferenceUtils";
 import { colorScheme } from "nativewind";
 import React, {
   createContext,
@@ -19,23 +20,35 @@ const ThemeContext = createContext<{
 export const useThemeContext = () => useContext(ThemeContext);
 
 export const ThemeWrapper = ({ children }: { children: React.ReactNode }) => {
-  const userPreference = useColorScheme();
-  const [theme, setTheme] = useState<Theme>("light");
+  const scheme = useColorScheme();
+  const theme = useMemo<Theme>(() => scheme ?? "light", [scheme]);
+  const [mounted, setMounted] = useState<boolean>(false);
 
   useEffect(() => {
     //init Database
     init();
+    //fetch theme
+    const fetchTheme = async () => {
+      const preferences = await getPreferences("theme");
+      if (preferences.theme) {
+        colorScheme.set(preferences.theme as Theme);
+      }
+      setMounted(true);
+    };
+    fetchTheme();
   }, []);
 
-  useEffect(() => {
-    setTheme(userPreference ?? "light");
-  }, [userPreference]);
-
   const toggleTheme = () => {
-    colorScheme.set(theme === "dark" ? "light" : "dark");
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setPreferences({ theme: newTheme });
+    colorScheme.set(newTheme);
   };
 
   const value = useMemo(() => ({ theme, toggleTheme }), [theme]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <ThemeContext.Provider value={value}>

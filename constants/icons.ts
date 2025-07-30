@@ -19,6 +19,7 @@ const icons = {
   copy: require("../assets/images/copy.png"),
   date: require("../assets/images/date.png"),
   delete: require("../assets/images/delete.png"),
+  dictionary: require("../assets/images/dictionary.png"),
   download: require("../assets/images/download.png"),
   edit: require("../assets/images/edit.png"),
   error: require("../assets/images/error.png"),
@@ -32,6 +33,7 @@ const icons = {
   image: require("../assets/images/image.png"),
   import: require("../assets/images/import.png"),
   info: require("../assets/images/info.png"),
+  keyword: require("../assets/images/keyword.png"),
   link: require("../assets/images/link.png"),
   logout: require("../assets/images/logout.png"),
   money: require("../assets/images/money.png"),
@@ -47,6 +49,7 @@ const icons = {
   arrow: require("../assets/images/arrow.png"),
   search: require("../assets/images/search.png"),
   select: require("../assets/images/select.png"),
+  settings: require("../assets/images/settings.png"),
   statistics: {
     filled: require("../assets/images/statistics-filled.png"),
     outlined: require("../assets/images/statistics-outlined.png"),

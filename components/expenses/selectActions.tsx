@@ -125,11 +125,11 @@ const SelectActions = ({
 
   const handleEdit = () => {
     if (collectionSelected.size > 1) {
-      router.navigate("/expenses/edit/main");
+      router.push("/expenses/edit/main");
     } else {
       const index = collectionSelected.values().next().value;
       setExpenseIndex(index || 0);
-      router.navigate({
+      router.push({
         pathname: "/expenses/edit/expense",
         params: { mode: "edit" },
       });

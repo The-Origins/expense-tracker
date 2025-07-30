@@ -195,7 +195,7 @@ const ExpenseCard = ({
                   ? expense.amount || "N/A"
                   : expense.date
                     ? dayjs(new Date(expense.date)).format(
-                        "dd DD MMM YYYY, hh:MM A  "
+                        "dd DD MMM YYYY, hh:MM A"
                       )
                     : ""}
               </ThemedText>

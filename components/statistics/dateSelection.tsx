@@ -28,7 +28,7 @@ const DateSelection = ({
   const router = useRouter();
   const handleChipClick = (value: number) => {
     if (path !== "date") {
-      router.navigate("/statistics/main");
+      router.push("/statistics/main");
       setExpand(false);
     }
     setDateParts((prev) => {

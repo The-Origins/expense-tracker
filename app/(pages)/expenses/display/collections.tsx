@@ -91,7 +91,7 @@ const Collections = () => {
   const handleNavigate = (collection: string) => {
     setLoading(true);
     setQueryParameters({ collection, search: "" });
-    router.navigate("/expenses/display/collection");
+    router.push("/expenses/display/collection");
   };
 
   const handleCollectionPress = (name: string) => {
