@@ -3,10 +3,10 @@ import CollectionCard from "@/components/expenses/collectionCard";
 import SelectAction from "@/components/expenses/selectAction";
 import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";
-import { QueryParameters } from "@/constants/common";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
 import { createCollection, deleteCollections } from "@/lib/collectionsUtils";
+import { QueryParameters } from "@/types/common";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
@@ -219,7 +219,10 @@ const Collections = () => {
                 </Pressable>
               )}
             </View>
-            <Pressable onPress={() => handleNavigate("expenses")} className=" h-[200px] p-[20px] gap-[20px] bg-primary rounded-[20px] flex-col justify-center ">
+            <Pressable
+              onPress={() => handleNavigate("expenses")}
+              className=" h-[200px] p-[20px] gap-[20px] bg-primary rounded-[20px] flex-col justify-center "
+            >
               <View className=" flex-row justify-between ">
                 <Image source={icons.money} className=" w-[40px]  h-[40px]" />
                 <Image
@@ -237,7 +240,10 @@ const Collections = () => {
                 {`${collections?.get("expenses")} item${collections?.get("expenses") === 1 ? "" : "s"}`}
               </ThemedText>
             </Pressable>
-            <Pressable onPress={() => handleNavigate("failed")} className=" p-[20px] flex-row items-center rounded-[20px] gap-5 bg-secondary ">
+            <Pressable
+              onPress={() => handleNavigate("failed")}
+              className=" p-[20px] flex-row items-center rounded-[20px] gap-5 bg-secondary "
+            >
               <Image source={icons.warning} className=" w-[30px] h-[30px] " />
               <View className=" flex-col flex-1 ">
                 <ThemedText
@@ -255,7 +261,10 @@ const Collections = () => {
                 className=" w-[20px] h-[20px]  rotate-[-90deg] "
               />
             </Pressable>
-            <Pressable onPress={() => handleNavigate("trash")} className=" p-[20px] flex-row items-center rounded-[20px] gap-5 bg-accent ">
+            <Pressable
+              onPress={() => handleNavigate("trash")}
+              className=" p-[20px] flex-row items-center rounded-[20px] gap-5 bg-accent "
+            >
               <Image source={icons.delete} className=" w-[30px] h-[30px] " />
               <View className=" flex-col flex-1 ">
                 <ThemedText

@@ -4,7 +4,6 @@ import SelectAction from "@/components/expenses/selectAction";
 import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
-import { Budget, BudgetItem } from "@/constants/common";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
 import {
@@ -13,6 +12,7 @@ import {
   getCategories,
   updateExpiredBudget,
 } from "@/lib/budgetUtils";
+import { Budget, BudgetItem } from "@/types/common";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Image, Pressable, View } from "react-native";

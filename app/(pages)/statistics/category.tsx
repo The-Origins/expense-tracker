@@ -2,7 +2,6 @@ import CategoryItem from "@/components/statistics/categoryItem";
 import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
-import { Statistic } from "@/constants/common";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
 import { useThemeContext } from "@/context/themeContext";
@@ -10,6 +9,7 @@ import {
   getCategoryStatistics,
   parseExpenseStatistic,
 } from "@/lib/statisticsUtils";
+import { Statistic } from "@/types/common";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Image, Pressable, View } from "react-native";

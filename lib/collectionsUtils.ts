@@ -1,5 +1,5 @@
-import { Expense } from "@/constants/common";
 import db from "@/db/schema";
+import { Expense } from "@/types/common";
 
 export const fetchCollections = async (collection?: string) => {
   let query = `SELECT * FROM collections`;
@@ -48,7 +48,7 @@ export const deleteCollections = async (
       return true;
     }
   });
-  
+
   return {
     collections,
     collectionNames,

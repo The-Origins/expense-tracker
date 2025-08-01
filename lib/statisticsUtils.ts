@@ -1,6 +1,6 @@
 import { colorCycle, tintColors } from "@/constants/colorSettings";
-import { Expense, Statistic } from "@/constants/common";
 import db from "@/db/schema";
+import { Expense, Statistic } from "@/types/common";
 
 export const getTimeStatistics = async ({
   year,

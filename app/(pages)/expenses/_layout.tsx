@@ -1,7 +1,7 @@
-import { Expense, QueryParameters } from "@/constants/common";
 import { AppPropsProvider } from "@/context/propContext";
 import { fetchCollections } from "@/lib/collectionsUtils";
 import { deleteExpenses, getExpenses } from "@/lib/expenseUtils";
+import { Expense, QueryParameters } from "@/types/common";
 import { Slot } from "expo-router";
 import React, { useEffect, useState } from "react";
 

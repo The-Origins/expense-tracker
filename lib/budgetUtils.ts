@@ -1,5 +1,5 @@
-import { Budget, BudgetItem, Expense } from "@/constants/common";
 import db from "@/db/schema";
+import { Budget, BudgetItem, Expense } from "@/types/common";
 import { SQLiteBindParams } from "expo-sqlite";
 import { nanoid } from "nanoid/non-secure";
 
@@ -102,7 +102,7 @@ export const updateExpiredBudget = async (
   budget.end = endDate.toISOString();
 
   const newBudget = await updateBudget(budget, "update");
-  console.log(newBudget)
+  console.log(newBudget);
   budgets[budgetIndex] = newBudget as Budget;
   return budgets;
 };

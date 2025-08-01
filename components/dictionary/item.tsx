@@ -1,5 +1,5 @@
-import { DictionaryItem } from "@/constants/common";
 import icons from "@/constants/icons";
+import { DictionaryItem } from "@/types/common";
 import React, { useMemo } from "react";
 import { Image, Pressable, View } from "react-native";
 import ThemedText from "../themedText";

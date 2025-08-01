@@ -1,6 +1,6 @@
-import { BudgetItem } from "@/constants/common";
+import { BudgetItem } from "@/types/common";
 import { Slot } from "expo-router";
-import React, { useDebugValue, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 
 const EditorLayout = () => {
@@ -8,9 +8,7 @@ const EditorLayout = () => {
     { type: "keyword" | "recipient"; data: BudgetItem[] }[]
   >([]);
 
-  useEffect(() => {
-
-  }, [])
+  useEffect(() => {}, []);
 
   return (
     <View className={` flex-1 pr-[10px] pl-[10px] `}>

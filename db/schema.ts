@@ -7,7 +7,6 @@ export const init = async () => {
     console.log("start");
     await db.execAsync(`
         PRAGMA journal_mode = WAL;
-        DELETE FROM expenses;
         CREATE TABLE IF NOT EXISTS expenses (
         id TEXT PRIMARY KEY,
         title TEXT,
@@ -22,23 +21,20 @@ export const init = async () => {
         image TEXT
       );
 
-    DELETE FROM collections;
     CREATE TABLE IF NOT EXISTS collections (
     name TEXT PRIMARY KEY,
     count INTEGER NOT NULL
     );
 
-    INSERT INTO collections (name, count) VALUES ('expenses', 0);
-    INSERT INTO collections (name, count) VALUES ('failed', 0);
-    INSERT INTO collections (name, count) VALUES ('trash', 0);
+    INSERT OR IGNORE INTO collections (name, count) VALUES ('expenses', 0);
+    INSERT OR IGNORE INTO collections (name, count) VALUES ('failed', 0);
+    INSERT OR IGNORE INTO collections (name, count) VALUES ('trash', 0);
 
-    DELETE FROM statistics;
     CREATE TABLE IF NOT EXISTS statistics (
       path TEXT PRIMARY KEY,
       total REAL NOT NULL
     );
 
-    DROP TABLE dictionary;
     CREATE TABLE IF NOT EXISTS dictionary (
         id TEXT,
         recipient TEXT,
@@ -48,7 +44,6 @@ export const init = async () => {
       );
     
       
-    DROP TABLE keywords;
     CREATE TABLE IF NOT EXISTS keywords (
         id TEXT,
         keyword TEXT,
@@ -83,7 +78,6 @@ export const init = async () => {
         value TEXT
       );
 
-      DROP TABLE notifications;
       CREATE TABLE IF NOT EXISTS notifications (
       id TEXT PRIMARY KEY,
       type TEXT,
@@ -94,8 +88,8 @@ export const init = async () => {
       unread BOOLEAN
       );
 
-      INSERT INTO notifications (id,type,path,title,message,date,unread ) VALUES ('1','info','/expenses/display/collections','new expenses','5 new expenses added today','2025-07-30T05:54:18.926Z',true);
-      INSERT INTO notifications (id,type,path,title,message,date,unread ) VALUES ('2','error','/expenses/display/collections','failed expenses','2 expenses failed','2025-07-30T06:54:18.926Z',false);
+      INSERT OR IGNORE INTO notifications (id,type,path,title,message,date,unread ) VALUES ('1','info','/expenses/display/collections','new expenses','5 new expenses added today','2025-07-30T05:54:18.926Z',true);
+      INSERT OR IGNORE INTO notifications (id,type,path,title,message,date,unread ) VALUES ('2','error','/expenses/display/collections','failed expenses','2 expenses failed','2025-07-30T06:54:18.926Z',false);
       `);
     console.log("end");
   } catch (error) {

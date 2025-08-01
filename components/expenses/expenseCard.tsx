@@ -1,6 +1,6 @@
 import { colorCycle, tintColors } from "@/constants/colorSettings";
-import { Expense, ReceiptModal } from "@/constants/common";
 import icons from "@/constants/icons";
+import { Expense, ReceiptModal } from "@/types/common";
 import dayjs from "dayjs";
 import React, { useEffect, useMemo, useState } from "react";
 import { Image, Pressable, View } from "react-native";

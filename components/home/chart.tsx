@@ -1,7 +1,7 @@
 import { tintColors } from "@/constants/colorSettings";
-import { Scope } from "@/constants/common";
 import icons from "@/constants/icons";
 import { getTimeStatistics, parseData } from "@/lib/statisticsUtils";
+import { Scope } from "@/types/common";
 import { Link } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";

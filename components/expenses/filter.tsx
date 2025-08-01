@@ -1,5 +1,5 @@
 import ThemedText from "@/components/themedText";
-import { ExpensesFilter } from "@/constants/common";
+import { ExpensesFilter } from "@/types/common";
 import React, { useMemo } from "react";
 import { Pressable, View } from "react-native";
 

@@ -1,6 +1,6 @@
 import { tintColors } from "@/constants/colorSettings";
-import { Status } from "@/constants/common";
 import icons from "@/constants/icons";
+import { Status } from "@/types/common";
 import React from "react";
 import { Image, Modal, Pressable, View } from "react-native";
 import * as Progress from "react-native-progress";

@@ -1,7 +1,7 @@
 import { getPercentColor, tintColors } from "@/constants/colorSettings";
-import { Budget } from "@/constants/common";
 import icons from "@/constants/icons";
 import { getBudgets } from "@/lib/budgetUtils";
+import { Budget } from "@/types/common";
 import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Image, Pressable, View } from "react-native";

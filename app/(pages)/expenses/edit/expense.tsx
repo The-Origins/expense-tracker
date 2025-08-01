@@ -3,16 +3,16 @@ import StatusModal from "@/components/statusModal";
 import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
+import icons from "@/constants/icons";
+import { useAppProps } from "@/context/propContext";
+import { updateExpense } from "@/lib/expenseUtils";
+import validateInput from "@/lib/validateInput";
 import {
   Expense,
   ExpenseForm,
   ExpenseFormErrors,
   Status,
-} from "@/constants/common";
-import icons from "@/constants/icons";
-import { useAppProps } from "@/context/propContext";
-import { updateExpense } from "@/lib/expenseUtils";
-import validateInput from "@/lib/validateInput";
+} from "@/types/common";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";

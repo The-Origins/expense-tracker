@@ -1,7 +1,7 @@
 import { tintColors } from "@/constants/colorSettings";
-import { Statistic } from "@/constants/common";
 import icons from "@/constants/icons";
 import { getCategoryStatistics } from "@/lib/statisticsUtils";
+import { Statistic } from "@/types/common";
 import { Link } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Image, Pressable, View } from "react-native";

@@ -1,9 +1,9 @@
-import { DictionaryItem } from "@/constants/common";
 import { AppPropsProvider } from "@/context/propContext";
 import {
   getDictionaryKeywords,
   getDictionaryRecipients,
 } from "@/lib/dictionaryUtils";
+import { DictionaryItem } from "@/types/common";
 import { Slot } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";

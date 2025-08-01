@@ -1,4 +1,4 @@
-import { Expense } from "@/constants/common";
+import { Expense } from "@/types/common";
 import dayjs from "dayjs";
 import { Link } from "expo-router";
 import React from "react";

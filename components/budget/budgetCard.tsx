@@ -1,8 +1,8 @@
 import { colorCycle, getPercentColor } from "@/constants/colorSettings";
-import { Budget } from "@/constants/common";
 import icons from "@/constants/icons";
+import { Budget } from "@/types/common";
 import dayjs from "dayjs";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Image, Pressable, View } from "react-native";
 import { ProgressChart } from "react-native-chart-kit";
 import ThemedText from "../themedText";
@@ -36,7 +36,6 @@ const BudgetCard = ({
   );
   const percent = useMemo(() => budget.current / budget.total, [budget]);
   const percentColor = useMemo(() => getPercentColor(percent), [percent]);
-
 
   const handlePress = () => {
     if (selectMode && handleSelect) {

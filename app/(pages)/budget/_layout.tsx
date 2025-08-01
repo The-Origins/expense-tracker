@@ -1,5 +1,5 @@
-import { Budget, BudgetItem } from "@/constants/common";
 import { AppPropsProvider } from "@/context/propContext";
+import { Budget, BudgetItem } from "@/types/common";
 import { Slot } from "expo-router";
 import React, { useState } from "react";
 

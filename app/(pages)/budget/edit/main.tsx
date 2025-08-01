@@ -2,12 +2,12 @@ import InputField from "@/components/inputField";
 import StatusModal from "@/components/statusModal";
 import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";
-import { Budget, BudgetForm, BudgetItem, Status } from "@/constants/common";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
 import { normalizeString } from "@/lib/appUtils";
 import { updateBudget } from "@/lib/budgetUtils";
 import validateInput from "@/lib/validateInput";
+import { Budget, BudgetForm, BudgetItem, Status } from "@/types/common";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";

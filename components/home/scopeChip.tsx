@@ -1,4 +1,4 @@
-import { Scope } from "@/constants/common";
+import { Scope } from "@/types/common";
 import React, { useMemo } from "react";
 import { Pressable } from "react-native";
 import ThemedText from "../themedText";

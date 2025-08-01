@@ -1,5 +1,5 @@
-import { Notification } from "@/constants/common";
 import icons from "@/constants/icons";
+import { Notification } from "@/types/common";
 import dayjs from "dayjs";
 import { Href, router } from "expo-router";
 import React, { useMemo } from "react";

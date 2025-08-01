@@ -1,6 +1,6 @@
 import { tintColors } from "@/constants/colorSettings";
-import { DateParts, StatisticsOption } from "@/constants/common";
 import icons from "@/constants/icons";
+import { DateParts, StatisticsOption } from "@/types/common";
 import { usePathname, useRouter } from "expo-router";
 import React from "react";
 import { Image, ScrollView, View } from "react-native";

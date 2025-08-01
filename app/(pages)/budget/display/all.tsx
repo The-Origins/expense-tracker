@@ -3,7 +3,6 @@ import SelectAction from "@/components/expenses/selectAction";
 import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
-import { Budget } from "@/constants/common";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
 import {
@@ -11,6 +10,7 @@ import {
   getBudgets,
   updateExpiredBudget,
 } from "@/lib/budgetUtils";
+import { Budget } from "@/types/common";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Image, Pressable, View } from "react-native";
@@ -50,10 +50,9 @@ const AllBudgets = () => {
         setLoading(false);
       };
       fetchBudgets();
-    }else{
+    } else {
       setLoading(false);
     }
-    
   }, [budgets, triggerFetch]);
 
   const handleItemSelect = (id: string, action: "add" | "delete") => {
@@ -79,7 +78,7 @@ const AllBudgets = () => {
   };
 
   const handleItemExpire = async (index: number) => {
-    console.log("called")
+    console.log("called");
     setLoading(true);
     const updatedBudgets = await updateExpiredBudget(index, budgets);
     setBudgets([...updatedBudgets]);

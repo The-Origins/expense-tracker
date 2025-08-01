@@ -1,6 +1,6 @@
 import { colorCycle, getPercentColor } from "@/constants/colorSettings";
-import { BudgetItem } from "@/constants/common";
 import icons from "@/constants/icons";
+import { BudgetItem } from "@/types/common";
 import React, { useMemo } from "react";
 import { Pressable, View } from "react-native";
 import { ProgressChart } from "react-native-chart-kit";

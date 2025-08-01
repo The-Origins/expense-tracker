@@ -2,10 +2,10 @@ import BottomTabs from "@/components/layout/bottomTabs";
 import DateSelection from "@/components/statistics/dateSelection";
 import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";
-import { DateParts, StatisticsOption } from "@/constants/common";
 import icons from "@/constants/icons";
 import { AppPropsProvider } from "@/context/propContext";
 import { getTimeStatistics, parseData } from "@/lib/statisticsUtils";
+import { DateParts, StatisticsOption } from "@/types/common";
 import dayjs from "dayjs";
 import { Slot, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
@@ -141,7 +141,7 @@ const StatisticsLayout = () => {
                       setDateParts,
                       handleNext,
                       handleBack,
-                      setExpand
+                      setExpand,
                     }}
                   />
                   <View className=" relative flex-row justify-between gap-1 ">

@@ -1,7 +1,7 @@
-import { Expense, Status } from "@/constants/common";
 import { useAppProps } from "@/context/propContext";
 import { updateCollections } from "@/lib/collectionsUtils";
 import { restoreExpenses } from "@/lib/expenseUtils";
+import { Expense, Status } from "@/types/common";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import { View } from "react-native";

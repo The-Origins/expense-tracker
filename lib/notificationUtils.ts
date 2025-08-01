@@ -1,5 +1,5 @@
-import { Notification } from "@/constants/common";
 import db from "@/db/schema";
+import { Notification } from "@/types/common";
 import { nanoid } from "nanoid/non-secure";
 
 export const getNotifications = async (page: number = 1) => {

@@ -3,13 +3,13 @@ import NotificationItem from "@/components/notifications/item";
 import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
-import { Notification } from "@/constants/common";
 import icons from "@/constants/icons";
 import {
   clearUnread,
   deleteNofications,
   getNotifications,
 } from "@/lib/notificationUtils";
+import { Notification } from "@/types/common";
 import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Image, Pressable, View } from "react-native";

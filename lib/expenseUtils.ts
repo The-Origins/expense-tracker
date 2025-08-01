@@ -1,5 +1,5 @@
-import { DictionaryItem, Expense } from "@/constants/common";
 import db from "@/db/schema";
+import { DictionaryItem, Expense } from "@/types/common";
 import { nanoid } from "nanoid/non-secure";
 import { normalizeString } from "./appUtils";
 import { updateBudgetsAndItems } from "./budgetUtils";

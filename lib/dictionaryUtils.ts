@@ -1,5 +1,5 @@
-import { DictionaryItem, Expense } from "@/constants/common";
 import db from "@/db/schema";
+import { DictionaryItem } from "@/types/common";
 import { nanoid } from "nanoid/non-secure";
 
 export const getDictionaryRecipients = async (

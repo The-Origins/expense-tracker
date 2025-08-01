@@ -4,12 +4,12 @@ import SelectAction from "@/components/expenses/selectAction";
 import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
-import { DictionaryItem } from "@/constants/common";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
 import { normalizeString } from "@/lib/appUtils";
 import { deleteDictionaryItems, parseData } from "@/lib/dictionaryUtils";
 import { getPreferences, setPreferences } from "@/lib/preferenceUtils";
+import { DictionaryItem } from "@/types/common";
 import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
