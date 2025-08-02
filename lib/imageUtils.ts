@@ -1,11 +1,12 @@
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
+
+export const takeImage = async () => {};
 
 export const pickImage = async () => {
-  // No permissions request is necessary for launching the image library
   let result = await ImagePicker.launchImageLibraryAsync({
     mediaTypes: ["images"],
-    allowsEditing: true,
     quality: 1,
   });
 
@@ -30,4 +31,24 @@ export const saveImage = async (uri: string) => {
 
 export const deleteImage = async (uri: string) => {
   await FileSystem.deleteAsync(uri);
+};
+
+export const fileExists = async (uri: string) => {
+  const info = await FileSystem.getInfoAsync(uri);
+  return info.exists;
+};
+
+export const requestMediaLibraryPermissions = async () => {
+  const { status } = await MediaLibrary.requestPermissionsAsync();
+  return status === "granted";
+};
+
+export const dowloadImage = async (uri: string) => {
+  const permitted = await requestMediaLibraryPermissions();
+
+  if (!permitted) {
+    throw new Error(`Permission denied`);
+  }
+
+  await MediaLibrary.saveToLibraryAsync(uri);
 };

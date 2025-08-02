@@ -5,6 +5,8 @@ import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
+import { normalizeString } from "@/lib/appUtils";
+import { pasteFromClipboard } from "@/lib/clipboardUtils";
 import { updateExpense } from "@/lib/expenseUtils";
 import { pickImage } from "@/lib/imageUtils";
 import validateInput from "@/lib/validateInput";
@@ -156,8 +158,6 @@ const EditExpense = () => {
     });
   };
 
-  const handleReceiptPaste = () => {};
-
   const handleDateChange = (event: DateTimePickerEvent, newDate?: Date) => {
     setDatePicker((prev) => ({ ...prev, open: Platform.OS === "ios" }));
     if (newDate) {
@@ -262,6 +262,27 @@ const EditExpense = () => {
         }
       }
       router.back();
+    }
+  };
+
+  const handleReceiptPaste = async () => {
+    try {
+      const text = await pasteFromClipboard();
+      setForm((prev) => ({ ...prev, receipt: text }));
+      setErrors((prev) => ({
+        ...prev,
+        receipt: validateInput("receipt", text, {}, false, undefined, 200),
+      }));
+      const normalized = normalizeString(text);
+      if (normalized !== expense.receipt?.toLowerCase()) {
+        setChanges((prev) => {
+          const newMap = new Map(prev);
+          newMap.set("receipt", normalized);
+          return newMap;
+        });
+      }
+    } catch (error) {
+      alert(error);
     }
   };
 
@@ -455,7 +476,7 @@ const EditExpense = () => {
                   )}
                   <View
                     style={{ zIndex: 1 }}
-                    className=" absolute w-[100%] h-[100%] bg-black/5 flex-row items-center justify-center "
+                    className=" absolute w-[100%] h-[100%] bg-black/5 flex-col gap-2 items-center justify-center "
                   >
                     {!form.image && (
                       <>

@@ -1,5 +1,7 @@
 import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
+import { copyToClipboard } from "@/lib/clipboardUtils";
+import { dowloadImage } from "@/lib/imageUtils";
 import React from "react";
 import { Image, Modal, Pressable, ScrollView, View } from "react-native";
 import ThemedIcon from "../themedIcon";
@@ -16,8 +18,29 @@ const ViewRecieptModal = ({
   open: boolean;
   handleClose: () => void;
 }) => {
-  const handleCopy = () => {};
-  const handleDownload = () => {};
+  const handleCopy = async () => {
+    try {
+      if (receipt) {
+        await copyToClipboard(receipt);
+      }
+    } catch (error) {
+      alert(error);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      if (image) {
+        await dowloadImage(image);
+        alert(`Image downloaded`);
+      } else {
+        throw new Error(`No Image`);
+      }
+    } catch (error) {
+      console.log(error);
+      alert(error);
+    }
+  };
 
   return (
     <Modal

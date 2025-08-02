@@ -12,11 +12,7 @@ export const getTimeStatistics = async ({
   month?: number | string;
   week?: string;
   date?: number | string;
-}): Promise<{
-  statistics: Statistic | null;
-  data: Statistic[];
-  scope: "year" | "month" | "date" | "";
-}> => {
+}) => {
   let scope = "";
   let statisticsQuery = "SELECT * FROM statistics WHERE path = ";
   let dataQuery = "SELECT * FROM statistics WHERE path LIKE ";
@@ -51,9 +47,9 @@ export const getTimeStatistics = async ({
     db.getAllAsync(dataQuery),
   ]);
   let results = { statistics, data, scope } as {
-    scope: "year" | "month" | "date" | "";
     statistics: Statistic | null;
     data: Statistic[];
+    scope: "year" | "month" | "date" | "";
   };
   return results;
 };
@@ -97,6 +93,23 @@ export const parseData = (
     if (scope === "month") {
       label = months[value];
     }
+    if (!scope) {
+      switch (value) {
+        case 1:
+          label = "morning";
+          break;
+        case 2:
+          label = "afternoon";
+          break;
+        case 3:
+          label = "evening";
+          break;
+
+        default:
+          break;
+      }
+    }
+
     labels.push(label);
     data.push(item.total);
     options.push({ label, value });

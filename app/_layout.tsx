@@ -23,7 +23,14 @@ export default function RootLayout() {
   return (
     <ThemeWrapper>
       <Stack>
-        <Stack.Screen name="(pages)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(pages)"
+          options={{
+            headerShown: false,
+            statusBarStyle: "auto",
+            navigationBarColor: "transparent",
+          }}
+        />
       </Stack>
     </ThemeWrapper>
   );
