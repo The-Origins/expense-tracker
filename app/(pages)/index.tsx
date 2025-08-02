@@ -11,7 +11,7 @@ import { Link } from "expo-router";
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
-export default function Index() {
+const Home = () => {
   const [scope, setScope] = useState<Scope>("today");
   const [total, setTotal] = useState<number>(0);
   const timeString = useMemo<string>(() => {
@@ -77,4 +77,6 @@ export default function Index() {
       <BottomTabs />
     </>
   );
-}
+};
+
+export default Home;

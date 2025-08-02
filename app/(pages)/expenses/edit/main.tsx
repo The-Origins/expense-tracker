@@ -8,14 +8,12 @@ import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
-import { ExpensesFilter, ReceiptModal, Status } from "@/types/common";
-import { useRouter } from "expo-router";
+import { Expense, ExpensesFilter, ReceiptModal, Status } from "@/types/common";
+import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Image, Pressable, View } from "react-native";
 
 const EditExpenses = () => {
-  const router = useRouter();
-
   const {
     edited,
     collectionSelected,
@@ -24,7 +22,15 @@ const EditExpenses = () => {
     expenses,
     setExpenseIndex,
     handleDelete,
-  } = useAppProps();
+  } = useAppProps() as {
+    edited: Set<number>;
+    collectionSelected: Set<number>;
+    editSelected: Set<number>;
+    setEditSelected: React.Dispatch<React.SetStateAction<Set<number>>>;
+    expenses: (Partial<Expense> | undefined)[];
+    setExpenseIndex: React.Dispatch<React.SetStateAction<number>>;
+    handleDelete: (mode: "collection" | "edited") => Promise<void>;
+  };
 
   const [status, setStatus] = useState<Status>({
     open: false,
@@ -146,7 +152,7 @@ const EditExpenses = () => {
     setReceiptModal({ open: false, receipt: "", image: "" });
   };
 
-  const handleEdit = (index: number) => {
+  const handleItemEdit = (index: number) => {
     setExpenseIndex(index);
     router.push({
       pathname: "/expenses/edit/expense",
@@ -271,7 +277,7 @@ const EditExpenses = () => {
                     selectMode,
                     handleSelectItem,
                     setReceiptModal,
-                    handleEdit,
+                    handleItemEdit,
                   }}
                 />
               ) : (

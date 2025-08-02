@@ -6,12 +6,11 @@ import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
 import { parseReceipts } from "@/lib/expenseUtils";
 import { Expense, Status } from "@/types/common";
-import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { router } from "expo-router";
+import React, { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 const Receipt = () => {
-  const router = useRouter();
   const [receipt, setReceipt] = useState<string>("");
   const [status, setStatus] = useState<Status>({
     open: false,
@@ -20,24 +19,16 @@ const Receipt = () => {
     action: { callback() {} },
   });
 
-  const appProps = useAppProps();
-
-  const { setExpenses, setCollectionSelected, setCollections } = useMemo<{
-    setExpenses: React.Dispatch<
-      React.SetStateAction<(Partial<Expense> | undefined)[]>
-    >;
-    setCollectionSelected: React.Dispatch<React.SetStateAction<Set<number>>>;
-    setCollections: React.Dispatch<
-      React.SetStateAction<Map<string, number> | null>
-    >;
-  }>(
-    () => ({
-      setExpenses: appProps.setExpenses,
-      setCollectionSelected: appProps.setCollectionSelected,
-      setCollections: appProps.setCollections,
-    }),
-    [appProps]
-  );
+  const { setExpenses, setCollectionSelected, setCollections } =
+    useAppProps() as {
+      setExpenses: React.Dispatch<
+        React.SetStateAction<(Partial<Expense> | undefined)[]>
+      >;
+      setCollectionSelected: React.Dispatch<React.SetStateAction<Set<number>>>;
+      setCollections: React.Dispatch<
+        React.SetStateAction<Map<string, number> | null>
+      >;
+    };
 
   const handleChange = (name: string, value: string) => {
     setReceipt(value);
@@ -74,6 +65,19 @@ const Receipt = () => {
       router.replace("/expenses/edit/main");
     } catch (error) {
       console.error(error);
+      setStatus({
+        open: true,
+        type: "error",
+        title: "Error",
+        message: "An Error Occured while parsing expenses",
+        handleClose: handleStatusClose,
+        action: {
+          callback: () => {
+            setReceipt("");
+            handleStatusClose();
+          },
+        },
+      });
     }
   };
 

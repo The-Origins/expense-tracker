@@ -1,5 +1,6 @@
 import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
+import { formatAmount } from "@/lib/appUtils";
 import { getTimeStatistics, parseData } from "@/lib/statisticsUtils";
 import { Scope } from "@/types/common";
 import { Link } from "expo-router";
@@ -70,7 +71,7 @@ const HomeChart = ({
               toggleOnDark={false}
               className=" font-urbanistBold text-[2.3rem] "
             >
-              -{statistics.total}
+              -Ksh {formatAmount(statistics.total, 10000)}
             </ThemedText>
 
             {statistics.average && (
@@ -81,8 +82,9 @@ const HomeChart = ({
                 >
                   Avg:
                 </ThemedText>
-                <ThemedText toggleOnDark={false} className="">
-                  {statistics.average.amount} per {statistics.average.unit}
+                <ThemedText toggleOnDark={false} className=" capitalize ">
+                  -Ksh {formatAmount(statistics.average.amount, 10000)} per{" "}
+                  {statistics.average.unit}
                 </ThemedText>
               </View>
             )}

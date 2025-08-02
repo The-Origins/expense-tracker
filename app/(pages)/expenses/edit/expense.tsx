@@ -6,23 +6,24 @@ import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
 import { updateExpense } from "@/lib/expenseUtils";
+import { pickImage } from "@/lib/imageUtils";
 import validateInput from "@/lib/validateInput";
 import {
   Expense,
   ExpenseForm,
   ExpenseFormErrors,
+  QueryParameters,
   Status,
 } from "@/types/common";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Image, Platform, Pressable, ScrollView, View } from "react-native";
 import * as Progress from "react-native-progress";
 
 const EditExpense = () => {
-  const router = useRouter();
   const { ids, mode } = useLocalSearchParams();
   const scrollViewRef = useRef<any>(null);
 
@@ -35,7 +36,22 @@ const EditExpense = () => {
     setCollections,
     setCollectionNames,
     setQueryParameters,
-  } = useAppProps();
+  } = useAppProps() as {
+    loading: boolean;
+    setExpenses: React.Dispatch<
+      React.SetStateAction<(Partial<Expense> | undefined)[]>
+    >;
+    setEdited: React.Dispatch<React.SetStateAction<Set<number>>>;
+    expenseIndex: number;
+    expenses: (Partial<Expense> | undefined)[];
+    setCollections: React.Dispatch<
+      React.SetStateAction<Map<string, number> | null>
+    >;
+    setCollectionNames: React.Dispatch<React.SetStateAction<string[]>>;
+    setQueryParameters: React.Dispatch<
+      React.SetStateAction<QueryParameters | null>
+    >;
+  };
 
   const expense = useMemo<Partial<Expense>>(
     () => (mode === "edit" ? expenses[expenseIndex] || {} : {}),
@@ -84,6 +100,7 @@ const EditExpense = () => {
       ref: "",
       receipt: "",
     });
+
     if (!expense.date) {
       setChanges((prev) => {
         const newMap = new Map(prev);
@@ -198,13 +215,13 @@ const EditExpense = () => {
           if (mode === "edit") {
             await updateExpense(change, "update", expense);
             if (expenses[expenseIndex]) {
-              setExpenses((prev: Partial<Expense>[]) => {
+              setExpenses((prev) => {
                 prev[expenseIndex] = { ...prev[expenseIndex], ...change };
                 return prev;
               });
-              setEdited((prev: Set<string>) => {
+              setEdited((prev) => {
                 const newSet = new Set(prev);
-                newSet.add(expense.id || "");
+                newSet.add(expenseIndex);
                 return newSet;
               });
             }
@@ -218,8 +235,8 @@ const EditExpense = () => {
                 newMap.set(change.collection || "", (existingCount || 0) + 1);
                 newMap.set("expenses", (newMap.get("expenses") || 0) + 1);
                 if (!existingCount) {
-                  setCollectionNames((prev: string[]) => [
-                    change.collection,
+                  setCollectionNames((prev) => [
+                    change.collection || "",
                     ...prev,
                   ]);
                 }
@@ -237,13 +254,38 @@ const EditExpense = () => {
             message: "There was an error when updating expense",
             handleClose: handleStatusClose,
             action: {
-              callback() {},
+              callback() {
+                handleStatusClose();
+              },
             },
           });
         }
       }
       router.back();
     }
+  };
+
+  const handleImageSelect = async () => {
+    const uri = await pickImage();
+    if (!uri) {
+      setStatus({
+        open: true,
+        type: "info",
+        title: "Operation canceled",
+        message: "No Image selected",
+        handleClose: handleStatusClose,
+        action: {
+          callback: handleStatusClose,
+        },
+      });
+      return;
+    }
+    setForm((prev) => ({ ...prev, image: uri }));
+    setChanges((prev) => {
+      const newMap = new Map(prev);
+      newMap.set("image", uri);
+      return newMap;
+    });
   };
 
   const handleReceiptsImport = () => {
@@ -401,25 +443,39 @@ const EditExpense = () => {
                 <ThemedText className=" font-urbanistMedium text-[1.2rem] ">
                   Image
                 </ThemedText>
-                <View className=" relative overflow-hidden rounded-[20px] flex-row aspect-square border border-divider ">
-                  {form.image ? (
-                    <Image src={form.image} className=" w-[100%] h-[100%] " />
-                  ) : (
-                    <View className=" flex-1 flex-col gap-2 justify-center items-center ">
-                      <Image
-                        source={icons.image}
-                        className=" w-[40px] h-[40px] "
-                        tintColor={tintColors.divider}
-                      />
-                      <ThemedText className=" text-divider ">
-                        No Image
-                      </ThemedText>
-                      <View className=" p-[20px] pt-[5px] pb-[5px] bg-black rounded-[20px] dark:bg-white ">
-                        <ThemedText reverse> Add</ThemedText>
-                      </View>
-                    </View>
+                <Pressable
+                  onPress={handleImageSelect}
+                  className={` relative overflow-hidden rounded-[20px] flex-row aspect-square border ${changes.has("image") ? "border-info" : "border-divider"} `}
+                >
+                  {form.image && (
+                    <Image
+                      source={{ uri: form.image }}
+                      className=" w-[100%] h-[100%] "
+                    />
                   )}
-                </View>
+                  <View
+                    style={{ zIndex: 1 }}
+                    className=" absolute w-[100%] h-[100%] bg-black/5 flex-row items-center justify-center "
+                  >
+                    {!form.image && (
+                      <>
+                        <Image
+                          source={icons.image}
+                          className=" w-[40px] h-[40px] "
+                          tintColor={tintColors.divider}
+                        />
+                        <ThemedText className=" text-divider ">
+                          No Image
+                        </ThemedText>
+                      </>
+                    )}
+                    <View className=" p-[20px] pt-[5px] pb-[5px] bg-black rounded-[20px] dark:bg-white ">
+                      <ThemedText reverse>
+                        {form.image ? "Change" : "Add"}
+                      </ThemedText>
+                    </View>
+                  </View>
+                </Pressable>
               </View>
             </View>
           </ScrollView>

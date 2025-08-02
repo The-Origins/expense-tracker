@@ -77,6 +77,7 @@ export type BudgetForm = {
 
 export type Statistic = {
   path: string;
+  value:number;
   total: number;
 };
 

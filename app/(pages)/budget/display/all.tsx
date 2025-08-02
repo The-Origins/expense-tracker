@@ -11,14 +11,12 @@ import {
   updateExpiredBudget,
 } from "@/lib/budgetUtils";
 import { Budget } from "@/types/common";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Image, Pressable, View } from "react-native";
 import * as Progress from "react-native-progress";
 
 const AllBudgets = () => {
-  const router = useRouter();
-
   const { triggerFetch, budgets, setBudgets, setBudgetIndex, setTriggerFetch } =
     useAppProps() as {
       triggerFetch: boolean;

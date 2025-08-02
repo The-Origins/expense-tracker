@@ -2,8 +2,8 @@ import { useAppProps } from "@/context/propContext";
 import { updateCollections } from "@/lib/collectionsUtils";
 import { restoreExpenses } from "@/lib/expenseUtils";
 import { Expense, Status } from "@/types/common";
-import { useRouter } from "expo-router";
-import React, { useMemo, useState } from "react";
+import { router } from "expo-router";
+import React, { useState } from "react";
 import { View } from "react-native";
 import StatusModal from "../statusModal";
 import ExportModal from "./exportModal";
@@ -19,9 +19,6 @@ const SelectActions = ({
   selected: Set<number>;
   resetSelected: () => void;
 }) => {
-  const router = useRouter();
-  const appProps = useAppProps();
-
   const [status, setStatus] = useState<Status>({
     open: false,
     type: "info",
@@ -43,7 +40,7 @@ const SelectActions = ({
     collectionSelected,
     setExpenseIndex,
     handleDelete,
-  } = useMemo<{
+  } = useAppProps() as {
     expenses: (Partial<Expense> | undefined)[];
     setExpenses: React.Dispatch<
       React.SetStateAction<(Partial<Expense> | undefined)[]>
@@ -57,20 +54,7 @@ const SelectActions = ({
       React.SetStateAction<Map<string, number> | null>
     >;
     handleDelete: (mode: "collection" | "edited") => Promise<void>;
-  }>(
-    () => ({
-      expenses: appProps.expenses,
-      setExpenses: appProps.setExpenses,
-      collections: appProps.collections,
-      collectionNames: appProps.collectionNames,
-      setCollections: appProps.setCollections,
-      setCollectionNames: appProps.setCollectionNames,
-      collectionSelected: appProps.collectionSelected,
-      setExpenseIndex: appProps.setExpenseIndex,
-      handleDelete: appProps.handleDelete,
-    }),
-    [appProps]
-  );
+  };
 
   const handleMove = () => {
     setMoveModal(true);

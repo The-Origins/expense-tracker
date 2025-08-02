@@ -7,6 +7,7 @@ export const init = async () => {
     console.log("start");
     await db.execAsync(`
         PRAGMA journal_mode = WAL;
+        DELETE FROM expenses;
         CREATE TABLE IF NOT EXISTS expenses (
         id TEXT PRIMARY KEY,
         title TEXT,
@@ -21,6 +22,7 @@ export const init = async () => {
         image TEXT
       );
 
+    DELETE FROM collections;
     CREATE TABLE IF NOT EXISTS collections (
     name TEXT PRIMARY KEY,
     count INTEGER NOT NULL
@@ -30,8 +32,10 @@ export const init = async () => {
     INSERT OR IGNORE INTO collections (name, count) VALUES ('failed', 0);
     INSERT OR IGNORE INTO collections (name, count) VALUES ('trash', 0);
 
+    DROP TABLE statistics;
     CREATE TABLE IF NOT EXISTS statistics (
       path TEXT PRIMARY KEY,
+      value INTEGER,
       total REAL NOT NULL
     );
 

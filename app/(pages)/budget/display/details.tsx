@@ -13,13 +13,12 @@ import {
   updateExpiredBudget,
 } from "@/lib/budgetUtils";
 import { Budget, BudgetItem } from "@/types/common";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { FlatList, Image, Pressable, View } from "react-native";
 import * as Progress from "react-native-progress";
 
 const BudgetDetails = () => {
-  const router = useRouter();
   const { id } = useLocalSearchParams();
 
   const {

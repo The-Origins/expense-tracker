@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 
 const ExpensesLayout = () => {
   const [loading, setLoading] = useState<boolean>(true);
-  const [edited, setEdited] = useState<Set<string>>(new Set());
+  const [edited, setEdited] = useState<Set<number>>(new Set());
   const [expenseIndex, setExpenseIndex] = useState<number>(0);
   const [collections, setCollections] = useState<Map<string, number> | null>(
     null

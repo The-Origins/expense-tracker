@@ -10,7 +10,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { DeviceEventEmitter, useColorScheme } from "react-native";
+import { DeviceEventEmitter, Platform, useColorScheme } from "react-native";
 
 type Theme = "light" | "dark";
 
@@ -49,25 +49,31 @@ export const ThemeWrapper = ({ children }: { children: React.ReactNode }) => {
       startForeground();
 
       //request sms listening permission
-      requestSMSPermission();
+      const updatePermissions = async () => {
+        setPermitted(await requestSMSPermission());
+      };
+      updatePermissions();
     } catch (error) {
       console.error(error);
     }
   }, []);
 
   useEffect(() => {
-    if (permitted) {
-      console.log("permitted");
-      //subscribe to sms listener
-      const sub = DeviceEventEmitter.addListener(
-        "SMS_RECEIVED",
-        (data: string) => {
-          const [sender, message] = data.split("|");
-          console.log("SMS from", sender, "→", message);
-          // TODO: Parse & add to DB
+    if (permitted && Platform.OS === "android") {
+      console.log("Subscribing to SMS listener...");
+
+      const smsReceivedSubscription = DeviceEventEmitter.addListener(
+        "SMS_RECEIVED", // Should match the constant used in native code
+        async (eventData: Record<string, string>) => {
+          // eventData is now an object: { sender: string, message: string }
+          console.log("SMS Received in JS:", eventData);
+
+          if (eventData && eventData.message && eventData.sender) {
+            const { sender, message } = eventData;
+          }
         }
       );
-      return () => sub.remove();
+      return () => smsReceivedSubscription.remove();
     }
   }, [permitted]);
 

@@ -3,15 +3,14 @@ import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
+import { formatAmount } from "@/lib/appUtils";
 import React, { useMemo } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import * as Progress from "react-native-progress";
 
 const Statistics = () => {
-  const appProps = useAppProps();
-
-  const { loading, date, timeString, data, statistics } = useMemo<{
+  const { loading, date, timeString, data, statistics } = useAppProps() as {
     loading: boolean;
     date: string;
     timeString: string;
@@ -20,16 +19,7 @@ const Statistics = () => {
       total: number;
       average?: { amount: number; unit: string };
     };
-  }>(
-    () => ({
-      loading: appProps.loading,
-      date: appProps.date,
-      timeString: appProps.timeString,
-      data: appProps.data,
-      statistics: appProps.statistics,
-    }),
-    [appProps]
-  );
+  };
   const width = useMemo<number>(() => data.labels.length * 130, [data]);
 
   return (
@@ -49,9 +39,9 @@ const Statistics = () => {
               <View className=" flex-row gap-2 items-end ">
                 <ThemedText
                   toggleOnDark={false}
-                  className=" font-urbanistBold text-[2rem] "
+                  className=" capitalize font-urbanistBold text-[2rem] "
                 >
-                  -{statistics.total}
+                  -Ksh{formatAmount(statistics.total, 10000)}
                 </ThemedText>
               </View>
               {statistics.average && (
@@ -61,9 +51,10 @@ const Statistics = () => {
                   </ThemedText>
                   <ThemedText
                     toggleOnDark={false}
-                    className=" font-urbanistMedium text-[1.1rem]  "
+                    className="capitalize font-urbanistMedium text-[1.1rem]  "
                   >
-                    -{statistics.average.amount} per {statistics.average.unit}
+                    -Ksh{formatAmount(statistics.average.amount, 100000 )} per{" "}
+                    {statistics.average.unit}
                   </ThemedText>
                 </View>
               )}

@@ -13,10 +13,10 @@ export const requestSMSPermission = async () => {
         PermissionsAndroid.RESULTS.GRANTED
     ) {
       console.log("SMS permissions granted");
-      // You can now expect SMS to be received
+      return true;
     } else {
       console.log("SMS permissions denied");
     }
-    console.log("Permission:", granted);
   }
+  return false
 };

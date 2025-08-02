@@ -1,3 +1,4 @@
+import { formatAmount } from "@/lib/appUtils";
 import { Expense } from "@/types/common";
 import dayjs from "dayjs";
 import { Link } from "expo-router";
@@ -23,9 +24,11 @@ const HomeExpenseCard = ({ expense }: { expense: Partial<Expense> }) => {
           </ThemedText>
           <View className=" flex-1 flex-row justify-end ">
             <ThemedText
-              className={` text-right font-urbanistBold text-[1.2rem] ${!expense.amount ? "text-error" : ""}`}
+              className={` text-right font-urbanistBold text-[1.2rem] ${!expense.amount ? "text-error" : "capitalize"}`}
             >
-              {expense.amount || "amount: missing"}
+              {expense.amount
+                ? `-${expense.currency} ` + formatAmount(expense.amount, 10000)
+                : "amount: missing"}
             </ThemedText>
           </View>
         </View>

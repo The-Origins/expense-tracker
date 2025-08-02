@@ -4,7 +4,7 @@ import { useAppProps } from "@/context/propContext";
 import { normalizeString } from "@/lib/appUtils";
 import { createCollection } from "@/lib/collectionsUtils";
 import validateInput from "@/lib/validateInput";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Image, Modal, Pressable, ScrollView, View } from "react-native";
 import InputField from "../inputField";
 import ThemedIcon from "../themedIcon";
@@ -21,15 +21,13 @@ const MoveModal = ({
   handleClose: () => void;
   handleSubmit: (collection: string) => void;
 }) => {
-  const appProps = useAppProps();
-
   const {
     collections,
     collectionNames,
     setCollections,
     setCollectionNames,
     getCollections,
-  } = useMemo<{
+  } = useAppProps() as {
     collections: Map<string, number> | null;
     collectionNames: string[];
     setCollections: React.Dispatch<
@@ -37,16 +35,8 @@ const MoveModal = ({
     >;
     setCollectionNames: React.Dispatch<React.SetStateAction<string[]>>;
     getCollections: () => Promise<void>;
-  }>(
-    () => ({
-      collections: appProps.collections,
-      collectionNames: appProps.collectionNames,
-      setCollections: appProps.setCollections,
-      setCollectionNames: appProps.setCollectionNames,
-      getCollections: appProps.getCollections,
-    }),
-    [appProps]
-  );
+  };
+
   const [newCollection, setNewCollection] = useState<string>("");
   const [addMode, setAddMode] = useState<boolean>(false);
   const [error, setError] = useState<string>("must have at least 1 character");

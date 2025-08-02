@@ -45,7 +45,15 @@
       "router": {},
       "eas": {
         "projectId": "ace5d8df-5583-4de1-8337-bf64251ef86d"
-      }
+      },
+      "plugins": [
+        [
+          "expo-image-picker",
+          {
+            "photosPermission": "Save receipt images"
+          }
+        ]
+      ]
     }
   }
 }

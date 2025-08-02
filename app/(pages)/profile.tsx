@@ -3,12 +3,11 @@ import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
 import { useThemeContext } from "@/context/themeContext";
-import { Link, useRouter } from "expo-router";
+import { Link, router } from "expo-router";
 import React, { useMemo } from "react";
 import { Pressable, ScrollView, Switch, Text, View } from "react-native";
 
 const Profile = () => {
-  const router = useRouter();
   const { theme, toggleTheme } = useThemeContext();
   const isDarkTheme = useMemo(() => theme === "dark", [theme]);
 

@@ -8,13 +8,12 @@ import { normalizeString } from "@/lib/appUtils";
 import { updateBudgetItem } from "@/lib/budgetUtils";
 import validateInput from "@/lib/validateInput";
 import { Budget, BudgetItem, Status } from "@/types/common";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 const EditItem = () => {
   const { mode } = useLocalSearchParams();
-  const router = useRouter();
 
   const {
     budgetIndex,

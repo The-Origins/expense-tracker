@@ -5,32 +5,25 @@ import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
 import { useThemeContext } from "@/context/themeContext";
+import { formatAmount } from "@/lib/appUtils";
 import {
   getCategoryStatistics,
   parseExpenseStatistic,
 } from "@/lib/statisticsUtils";
 import { Statistic } from "@/types/common";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, Image, Pressable, View } from "react-native";
 import { PieChart } from "react-native-chart-kit";
 import * as Progress from "react-native-progress";
 
 const CategoryStatistics = () => {
-  const router = useRouter();
   const { theme } = useThemeContext();
   const { category, total } = useLocalSearchParams();
 
-  const appProps = useAppProps();
-
-  const { timeString } = useMemo<{
+  const { timeString } = useAppProps() as {
     timeString: string;
-  }>(
-    () => ({
-      timeString: appProps.timeString,
-    }),
-    [appProps]
-  );
+  };
 
   const [loading, setLoading] = useState<boolean>(true);
   const [highlight, setHighlight] = useState<number | null>(null);
@@ -55,9 +48,9 @@ const CategoryStatistics = () => {
     fetchExpenseStatistics();
   }, []);
 
-  const handleClick = (value: number) => {
+  const handleClick = useCallback((value: number) => {
     setHighlight((prev) => (prev === value ? null : value));
-  };
+  }, []);
 
   return (
     <View className=" flex-1 flex-col gap-[20px] pt-[20px]  ">
@@ -115,8 +108,11 @@ const CategoryStatistics = () => {
               %
             </ThemedText>
           )}
-          <ThemedText className=" font-urbanistBold text-[1.2rem] ">
-            -${highlight ? parsedData[highlight - 1].amount : total}
+          <ThemedText className=" capitalize font-urbanistBold text-[1.2rem] ">
+            -
+            {highlight
+              ? "Ksh" + formatAmount(parsedData[highlight - 1].amount, 10000)
+              : total}
           </ThemedText>
           <ThemedText className=" capitalize text-center w-[80%] ">
             {highlight ? parsedData[highlight - 1].name : category}

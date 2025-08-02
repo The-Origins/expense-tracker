@@ -43,6 +43,9 @@ export const getTimeStatistics = async ({
     statisticsQuery += `'all'`;
     dataQuery += `'years/%'`;
   }
+
+  dataQuery += ` AND total > 0 ORDER BY value ASC `;
+
   let [statistics, data] = await Promise.all([
     db.getFirstAsync(statisticsQuery),
     db.getAllAsync(dataQuery),
@@ -60,35 +63,37 @@ export const getCategoryStatistics = async (
   category?: string
 ): Promise<Statistic[]> => {
   const results = await db.getAllAsync(
-    `SELECT * FROM statistics WHERE path LIKE '${timePath}/${category ? `${category}/expenses/%` : "categories/%"}' `
+    `SELECT * FROM statistics WHERE (path LIKE '${timePath}/${category ? `${category}/expenses/%` : "categories/%"}') AND (total > 0 ) ORDER BY total DESC `
   );
   return results as Statistic[];
 };
+
+export const months = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "November",
+  "December",
+];
 
 export const parseData = (
   dataArr: Statistic[],
   scope?: "year" | "month" | "date" | ""
 ) => {
-  let months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "November",
-    "December",
-  ];
   let labels = [""];
   let data = [0];
   let options: { value: number; label: string }[] = [];
 
   for (let item of dataArr) {
-    let [label] = item.path.split("/").slice(-1);
-    let value = Number(label);
+    let value = item.value;
+    let label = String(value);
+
     if (scope === "month") {
       label = months[value];
     }
@@ -106,7 +111,7 @@ export const getStatisticsPaths = (
   dateString: string,
   category: string,
   expense: string
-): string[] => {
+) => {
   let date = new Date(dateString);
   let [year, month, day, hour] = [
     date.getFullYear().toString(),
@@ -117,12 +122,14 @@ export const getStatisticsPaths = (
   // let weekStart = date.getDate() - date.getDay();
   // let weekEnd = weekStart + 6;
 
-  let timeOfDay =
+  let timeOfDay: "morning" | "afternoon" | "evening" =
     hour >= 6 && hour < 12
       ? "morning"
       : hour >= 12 && hour < 18
         ? "afternoon"
         : "evening";
+
+  let values: Record<string, number> = {};
 
   let paths = ["all"];
   let path: string = "";
@@ -133,15 +140,20 @@ export const getStatisticsPaths = (
 
   path = year;
   paths.push(`years/${path}`);
+  values[`years/${path}`] = Number(year);
   paths.push(`${path}${categoryPath}`, `${path}/${category}${expensePath}`);
   paths.push(`${path}/months/${month}`);
+  values[`${path}/months/${month}`] = Number(month);
   path += "/" + month;
   paths.push(`${path}${categoryPath}`, `${path}/${category}${expensePath}`);
   paths.push(`${path}/dates/${day}`);
+  values[`${path}/dates/${day}`] = Number(day);
   path += "/" + day;
   paths.push(`${path}${categoryPath}`, `${path}/${category}${expensePath}`);
   paths.push(`${path}/times/${timeOfDay}`);
-  return paths;
+  values[`${path}/times/${timeOfDay}`] =
+    timeOfDay === "morning" ? 1 : timeOfDay === "afternoon" ? 2 : 3;
+  return { paths, values };
 };
 
 export const updateStatistics = (
@@ -150,17 +162,20 @@ export const updateStatistics = (
   mode: "add" | "delete" = "add"
 ) => {
   if (expense.date && expense.category && expense.title && expense.amount) {
-    const paths = getStatisticsPaths(
+    const { paths, values } = getStatisticsPaths(
       expense.date,
       expense.category,
       expense.title
     );
-    console.log("mode: ", mode, "paths: ", paths);
+
+    let value: number = 0;
+
     for (let path of paths) {
+      value = values[path] === undefined ? value : values[path];
       operations.push(
         db.execAsync(
-          `${mode === "add" ? `INSERT OR IGNORE INTO statistics (path, total) VALUES ('${path}', ${0});` : ""}
-          UPDATE statistics SET total = total ${mode === "add" ? "+ " : "- "}${expense.amount} WHERE path='${path}';
+          `${mode === "add" ? `INSERT OR IGNORE INTO statistics (path, value, total) VALUES ("${path}", "${value}", ${0});` : ""}
+          UPDATE statistics SET total = total ${mode === "add" ? "+ " : "- "}${expense.amount} WHERE path="${path}";
                `
         )
       );
@@ -177,11 +192,7 @@ export const parseExpenseStatistic = (
   const [name] = item.path.split("/").slice(-1);
   const color =
     !highlight || highlight === index + 1
-      ? (tintColors[
-          colorCycle[
-            (index % 3) as keyof typeof colorCycle
-          ] as keyof typeof tintColors
-        ] as string)
+      ? (tintColors[colorCycle[index % 3] as keyof typeof tintColors] as string)
       : tintColors.paper[theme];
   return { name, color, amount: item.total };
 };

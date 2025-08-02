@@ -7,20 +7,16 @@ import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
-import { useThemeContext } from "@/context/themeContext";
 import { normalizeString } from "@/lib/appUtils";
 import { groupExpenseSections } from "@/lib/expenseUtils";
-import { QueryParameters, ReceiptModal } from "@/types/common";
-import { useRouter } from "expo-router";
-import React, { useEffect, useMemo, useState } from "react";
+import { Expense, QueryParameters, ReceiptModal } from "@/types/common";
+import { router } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Image, Pressable, SectionList, TextInput, View } from "react-native";
 import * as Progress from "react-native-progress";
 
 const Collection = () => {
-  const router = useRouter();
-  const { theme } = useThemeContext();
-
-  let {
+  const {
     loading,
     expenses,
     collectionSelected,
@@ -28,24 +24,35 @@ const Collection = () => {
     queryParameters,
     setQueryParameters,
     setExpenseIndex,
-  } = useAppProps();
+  } = useAppProps() as {
+    loading: boolean;
+    expenses: (Partial<Expense> | undefined)[];
+    collectionSelected: Set<number>;
+    setCollectionSelected: React.Dispatch<React.SetStateAction<Set<number>>>;
+    queryParameters: QueryParameters | null;
+    setQueryParameters: React.Dispatch<
+      React.SetStateAction<QueryParameters | null>
+    >;
+    setExpenseIndex: React.Dispatch<React.SetStateAction<number>>;
+  };
 
   const collection = useMemo<string>(
     () => queryParameters?.collection || "",
     [queryParameters]
   );
+
   const [expenseIndicies, setExpenseIndicies] = useState<number[]>([]);
   const sections = useMemo<{ id: string; data: number[] }[]>(() => {
     const data = groupExpenseSections(expenses);
-    setExpenseIndicies(data.indicies);
+    setExpenseIndicies(data.indices);
     return data.groups;
   }, [expenses]);
 
-  const [selectedSections, setSelectedSections] = useState<
-    Record<string, number>
-  >({});
+  const [selected, setSelected] = useState<Map<string, Set<number>>>(new Map());
 
   const [selectMode, setSelectMode] = useState<boolean>(false);
+  const [selectAll, setSelectAll] = useState<boolean | null>(null);
+
   const allSelected = useMemo<boolean>(
     () => collectionSelected.size === expenseIndicies.length,
     [collectionSelected, expenseIndicies]
@@ -62,7 +69,7 @@ const Collection = () => {
   useEffect(() => {
     const searchTimeout = setTimeout(() => {
       const normalized = normalizeString(search);
-      setQueryParameters((prev: QueryParameters | null) => {
+      setQueryParameters((prev) => {
         if (prev && prev.search !== normalized) {
           return {
             ...prev,
@@ -81,7 +88,9 @@ const Collection = () => {
 
   const resetSelected = () => {
     setCollectionSelected(new Set());
+    setSelected(new Map());
     setSelectMode(false);
+    setSelectAll(null);
   };
 
   const handleTitleBtnClick = () => {
@@ -96,8 +105,10 @@ const Collection = () => {
     if (selectMode) {
       if (allSelected) {
         setCollectionSelected(new Set());
+        setSelectAll(false);
       } else {
         setCollectionSelected(new Set(expenseIndicies));
+        setSelectAll(true);
       }
     } else {
       setSelectMode(true);
@@ -106,7 +117,7 @@ const Collection = () => {
 
   const handleSearchClear = () => {
     setSearch("");
-    setQueryParameters((prev: QueryParameters) => ({ ...prev, search: "" }));
+    setQueryParameters((prev) => ({ ...prev, search: "" }));
   };
 
   const handleSearchChange = (value: string) => {
@@ -117,52 +128,59 @@ const Collection = () => {
     setReceiptModal({ open: false, receipt: "", image: "" });
   };
 
-  const handleSelectItem = (index: number, action: "add" | "delete") => {
-    if (!selectMode) {
-      setSelectMode(true);
-    }
-    setCollectionSelected((prev: Set<number>) => {
-      const newSet = new Set(prev);
-      newSet[action](index);
-      return newSet;
-    });
-  };
+  const handleSectionSelect = useCallback(
+    (section: { id: string; data: number[] }, selectAll: boolean) => {
+      if (!selectMode) {
+        setSelectMode(true);
+      }
+      setSelected((prev) => {
+        prev.set(section.id, new Set(selectAll ? section.data : undefined));
+        return prev;
+      });
+      setCollectionSelected((prev) => {
+        const newSet = new Set(prev);
+        for (let item of section.data) {
+          if (selectAll) {
+            newSet.add(item);
+          } else {
+            newSet.delete(item);
+          }
+        }
+        return newSet;
+      });
+    },
+    [selectMode]
+  );
 
-  const handleItemEdit = (index: number) => {
+  const handleSelectItem = useCallback(
+    (index: number, action: "add" | "delete", sectionId?: string) => {
+      if (sectionId) {
+        if (!selectMode) {
+          setSelectMode(true);
+        }
+        setSelected((prev) => {
+          const newSet = new Set(prev.get(sectionId));
+          newSet[action](index);
+          prev.set(sectionId, newSet);
+          return prev;
+        });
+        setCollectionSelected((prev) => {
+          const newSet = new Set(prev);
+          newSet[action](index);
+          return newSet;
+        });
+      }
+    },
+    [selectMode]
+  );
+
+  const handleItemEdit = useCallback((index: number) => {
     setExpenseIndex(index);
     router.push({
       pathname: "/expenses/edit/expense",
       params: { mode: "edit" },
     });
-  };
-
-  const updateSelectedSections = (
-    sectionId: string,
-    decrement: boolean = false
-  ) => {
-    setSelectedSections((prev) => ({
-      ...prev,
-      [sectionId]: decrement
-        ? (prev[sectionId] || 0) - 1
-        : (prev[sectionId] || 0) + 1,
-    }));
-  };
-
-  const handleSelectSection = (
-    section: { id: string; data: number[] },
-    action: "add" | "delete"
-  ) => {
-    if (!selectMode) {
-      setSelectMode(true);
-    }
-    setCollectionSelected((prev: Set<number>) => {
-      const newSet = new Set(prev);
-      for (let index of section.data) {
-        newSet[action](index);
-      }
-      return newSet;
-    });
-  };
+  }, []);
 
   return (
     <>
@@ -216,14 +234,8 @@ const Collection = () => {
                   onChangeText={handleSearchChange}
                   value={search}
                   placeholder="Search"
-                  className=" flex-1 "
-                  placeholderTextColor={
-                    theme === "dark" ? tintColors.light : undefined
-                  }
-                  style={{
-                    color:
-                      theme === "dark" ? tintColors.light : tintColors.dark,
-                  }}
+                  className=" flex-1 dark:color-white "
+                  placeholderTextColor={tintColors.divider}
                 />
                 {search.length ? (
                   <Pressable onPress={handleSearchClear}>
@@ -255,18 +267,18 @@ const Collection = () => {
                     editMode: collection === "failed",
                     sectionId: section.id,
                     expense: expenses[item],
-                    selected: collectionSelected,
+                    selected: selected.get(section.id),
                     selectMode,
                     setReceiptModal,
                     handleSelectItem,
-                    updateSelectedSections,
-                    handleEdit: handleItemEdit,
+                    handleItemEdit,
                   }}
                 />
               ) : (
                 <></>
               )
             }
+            keyExtractor={(item, index) => `${item}-${index}`}
             SectionSeparatorComponent={() => (
               <View className=" p-[10px] "></View>
             )}
@@ -276,8 +288,9 @@ const Collection = () => {
                 {...{
                   section,
                   selectMode,
-                  selectedSections,
-                  handleSelectSection,
+                  selectAll,
+                  selected: selected.get(section.id),
+                  handleSectionSelect,
                 }}
               />
             )}

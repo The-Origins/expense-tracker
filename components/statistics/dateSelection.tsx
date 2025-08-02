@@ -1,7 +1,7 @@
 import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
 import { DateParts, StatisticsOption } from "@/types/common";
-import { usePathname, useRouter } from "expo-router";
+import { router, usePathname } from "expo-router";
 import React from "react";
 import { Image, ScrollView, View } from "react-native";
 import ThemedText from "../themedText";
@@ -25,7 +25,6 @@ const DateSelection = ({
   setExpand: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const path = usePathname().split("/")[2];
-  const router = useRouter();
   const handleChipClick = (value: number) => {
     if (path !== "date") {
       router.push("/statistics/main");

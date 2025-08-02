@@ -7,15 +7,11 @@ import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
 import { createCollection, deleteCollections } from "@/lib/collectionsUtils";
 import { QueryParameters } from "@/types/common";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Image, Pressable, ScrollView, View } from "react-native";
 
 const Collections = () => {
-  const router = useRouter();
-
-  const appProps = useAppProps();
-
   const [expand, setExpand] = useState<boolean>(false);
   const [addMode, setAddMode] = useState<boolean>(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
@@ -28,7 +24,7 @@ const Collections = () => {
     setLoading,
     setQueryParameters,
     getCollections,
-  } = useMemo<{
+  } = useAppProps() as {
     collections: Map<string, number> | null;
     collectionNames: string[];
     setCollections: React.Dispatch<
@@ -40,18 +36,7 @@ const Collections = () => {
       React.SetStateAction<QueryParameters | null>
     >;
     getCollections: () => Promise<void>;
-  }>(
-    () => ({
-      collections: appProps.collections,
-      collectionNames: appProps.collectionNames,
-      setCollections: appProps.setCollections,
-      setCollectionNames: appProps.setCollectionNames,
-      setLoading: appProps.setLoading,
-      setQueryParameters: appProps.setQueryParameters,
-      getCollections: appProps.getCollections,
-    }),
-    [appProps]
-  );
+  };
   const allSelected = useMemo<boolean>(
     () => selected.size === collectionNames.length,
     [selected, collectionNames]

@@ -11,13 +11,12 @@ import { Budget, BudgetForm, BudgetItem, Status } from "@/types/common";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Platform, Pressable, ScrollView, View } from "react-native";
 
 const EditMain = () => {
   const { mode } = useLocalSearchParams();
-  const router = useRouter();
 
   const { budgetIndex, budgets, setBudgets, setCategories } = useAppProps() as {
     budgetIndex: number;

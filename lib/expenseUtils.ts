@@ -4,6 +4,7 @@ import { nanoid } from "nanoid/non-secure";
 import { normalizeString } from "./appUtils";
 import { updateBudgetsAndItems } from "./budgetUtils";
 import { addToCollection, removeFromCollection } from "./collectionsUtils";
+import { deleteImage, saveImage } from "./imageUtils";
 import { updateStatistics } from "./statisticsUtils";
 
 export const getExpenses = async ({
@@ -22,33 +23,33 @@ export const getExpenses = async ({
   let query: string = " SELECT * FROM expenses ";
 
   if (ids && ids.length) {
-    query += ` WHERE id IN (${ids.map((id) => `'${id}'`)}) `;
+    query += ` WHERE id IN (${ids.map((id) => `"${id}"`)}) `;
   }
 
   if (collection) {
     if (collection !== "expenses") {
-      query += ` ${ids?.length ? "AND" : "WHERE"} collection = '${collection}' `;
+      query += ` ${ids?.length ? "AND" : "WHERE"} collection = "${collection}" `;
     } else {
-      query += ` ${ids?.length ? "AND" : "WHERE"} collection != 'failed' AND collection != 'trash' `;
+      query += ` ${ids?.length ? "AND" : "WHERE"} collection != "failed" AND collection != "trash" `;
     }
   }
 
   if (search) {
     query += ` ${ids?.length || collection ? "AND" : "WHERE"} 
-    (title LIKE '%${search}%'
-    OR category LIKE '%${search}%'
-    OR recipient LIKE '%${search}%'
-    OR ref LIKE '%${search}%'
-    OR collection LIKE '%${search}%'
-    OR amount LIKE '%${search}%'
-    OR date LIKE '%${search}%'
-    OR receipt LIKE '%${search}%'
+    (title LIKE "%${search}%"
+    OR category LIKE "%${search}%"
+    OR recipient LIKE "%${search}%"
+    OR ref LIKE "%${search}%"
+    OR collection LIKE "%${search}%"
+    OR amount LIKE "%${search}%"
+    OR date LIKE "%${search}%"
+    OR receipt LIKE "%${search}%"
     ) 
     `;
   }
 
   query += ` 
-  ORDER BY date ASC 
+  ORDER BY date DESC 
   `;
 
   if (page && limit) {
@@ -132,14 +133,14 @@ export const restoreExpenses = async (
   let ids: string[] = [];
 
   for (let index of selected) {
-    ids.push(`'${expenses[index]?.id}'`);
+    ids.push(`"${expenses[index]?.id}"`);
     expenses[index] = undefined;
   }
 
   await db.execAsync(`
-    UPDATE expenses SET collection = 'expenses' WHERE id IN (${ids});
-    UPDATE collections SET count = count + ${selected.size} WHERE name = 'expenses';
-    UPDATE collections SET count = count - ${selected.size} WHERE name = 'trash';
+    UPDATE expenses SET collection = "expenses" WHERE id IN (${ids});
+    UPDATE collections SET count = count + ${selected.size} WHERE name = "expenses";
+    UPDATE collections SET count = count - ${selected.size} WHERE name = "trash";
     `);
 
   if (collections) {
@@ -161,7 +162,7 @@ export const groupExpenseSections = (
 ) => {
   let groups: { id: string; data: number[] }[] = [];
   let groupIndex: Record<string, number> = {};
-  let indicies: number[] = [];
+  let indices: number[] = [];
 
   for (let i = 0; i < expenses.length; i++) {
     const expense = expenses[i];
@@ -175,9 +176,9 @@ export const groupExpenseSections = (
     } else {
       groups[groupIndex[id]].data.push(i);
     }
-    indicies.push(i);
+    indices.push(i);
   }
-  return { groups, indicies };
+  return { groups, indices };
 };
 
 export const updateExpense = async (
@@ -192,11 +193,15 @@ export const updateExpense = async (
     operations.push(
       db.runAsync(
         `
-        ${isTrash || isFailed ? "DELETE FROM expenses" : "UPDATE expenses SET collection = 'trash'"} WHERE id = ?
+        ${isTrash || isFailed ? "DELETE FROM expenses" : ` UPDATE expenses SET collection = "trash"`} WHERE id = ?
         `,
         expense.id
       )
     );
+    if ((isTrash || isFailed) && expense.image) {
+      operations.push(deleteImage(expense.image));
+    }
+
     if (expense.collection) {
       operations.push(removeFromCollection(expense.collection));
       if (!isTrash && !isFailed) {
@@ -209,6 +214,11 @@ export const updateExpense = async (
     const keys = Object.keys(expense);
     const values = Object.values(expense);
     if (mode === "add") {
+      if (expense.image) {
+        const uri = await saveImage(expense.image);
+        expense.image = uri;
+      }
+
       operations.push(
         db.runAsync(
           `INSERT INTO expenses (${keys.join(", ")}) VALUES ( ?${", ?".repeat(keys.length - 1)})`,
@@ -223,10 +233,15 @@ export const updateExpense = async (
       }
     }
     if (mode === "update" && expense.id) {
+      if (expense.image && previousExpense && previousExpense.image) {
+        operations.push(deleteImage(previousExpense.image));
+        const uri = await saveImage(expense.image);
+        expense.image = uri;
+      }
       operations.push(
         db.runAsync(
           `
-            UPDATE expenses SET ${keys.map((key) => `${key} = ?`)} WHERE id='${expense.id}'
+            UPDATE expenses SET ${keys.map((key) => `${key} = ?`)} WHERE id="${expense.id}"
             `,
           values
         )
@@ -267,21 +282,19 @@ export const updateExpense = async (
 export const parseReceipts = async (receiptString: string) => {
   const expenses: Partial<Expense>[] = [];
   const receipts: string[] = await new Promise((resolve, reject) => {
-    const data = receiptString.split(
-      /(?=(\b(?=[A-Z\d]{10}\b)(?=[A-Z\d]*\d)(?=[A-Z\d]*[A-Z])[A-Z\d]{10}))/
-    );
+    const data = receiptString.split(/confirmed/i);
     resolve(data);
   });
 
+  console.log(receipts.length);
   await db.withTransactionAsync(async () => {
     const operations = [];
     for (let i = 0; i < receipts.length; i++) {
-      let ref = receipts[i];
-      let receipt: string;
+      let ref = receipts[i].slice(-11).trim();
+      console.log("ref: ", ref);
 
       if (/^(?=.*\d)[A-Z\d]{10}$/.test(ref)) {
-        receipt = receipts[i + 1];
-        i++;
+        let receipt: string = receipts[i + 1].slice(0, -11);
         operations.push(handleReceipt(ref, receipt, expenses));
       }
     }
@@ -295,7 +308,7 @@ const handleReceipt = async (
   receipt: string,
   expenses: Partial<Expense>[]
 ) => {
-  receipt = ref + normalizeString(receipt).substring(ref.length);
+  receipt = `${ref} confirmed` + normalizeString(receipt);
   if (!/(sent to|paid to|you bought|withdraw)/i.test(receipt)) {
     return;
   }
@@ -324,9 +337,7 @@ const handleReceipt = async (
 };
 
 const parseReceipt = (receipt: string) => {
-  const recipientMatch = receipt.match(
-    /to\s+([A-Z0-9\s'/-]+?)(?=\s+on|\.)|from (.+?) new/i
-  );
+  const recipientMatch = receipt.match(/to (.+?) on|from (.+?) new/i);
   const amountMatch = receipt.match(/ksh(\d{1,3}(,\d{3})*(\.\d{2})?)/i);
   const transactionCostMatch = receipt.match(
     /transaction cost, ksh(\d{1,3}(,\d{3})*(\.\d{2})?)/i
@@ -415,12 +426,12 @@ export const fetchExpenseInfo = async (recipient?: string) => {
   }
 
   if (!title) {
+    title = recipient.split(" ").slice(0, 2).join(" ");
+
     let accountIndex = recipient.indexOf("for account");
     if (accountIndex !== -1) {
       accountIndex += 12;
-      title = recipient.substring(accountIndex);
-    } else {
-      title = recipient.split(" ").slice(0, 2).join(" ");
+      title += " - " + recipient.substring(accountIndex);
     }
   }
 

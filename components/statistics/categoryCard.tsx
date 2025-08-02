@@ -1,5 +1,6 @@
 import { colorCycle } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
+import { formatAmount } from "@/lib/appUtils";
 import { Link } from "expo-router";
 import React, { useMemo } from "react";
 import { Pressable, View } from "react-native";
@@ -17,7 +18,6 @@ const CategoryCard = ({
   total: number;
   percent: number | string;
 }) => {
-  const isPaper = useMemo(() => index % 4 === 3, [index]);
   let title = useMemo<string>(() => {
     return path.split("/").slice(-1)[0];
   }, [path]);
@@ -31,21 +31,21 @@ const CategoryCard = ({
       asChild
     >
       <Pressable
-        className={` grow w-[150px] p-[20px] rounded-[20px] flex-col gap-5 bg-${colorCycle[(index % 4) as keyof typeof colorCycle]} ${isPaper ? "dark:bg-paper-dark" : ""}`}
+        className={` grow w-[150px] p-[20px] rounded-[20px] flex-col gap-5 bg-${colorCycle[index % 3]}`}
       >
         <View className=" flex-row gap-1">
           <View className=" flex-1 flex-col gap-1">
-            <ThemedText toggleOnDark={isPaper} className=" text-[1.3rem]">
+            <ThemedText toggleOnDark={false} className=" text-[1.3rem]">
               {percent}%
             </ThemedText>
             <ThemedText
-              toggleOnDark={isPaper}
+              toggleOnDark={false}
               className=" font-urbanistBold text-[1.5rem]"
             >
-              -{total}
+              -Ksh {formatAmount(total, 10000)}
             </ThemedText>
             <ThemedText
-              toggleOnDark={isPaper}
+              toggleOnDark={false}
               className=" font-urbanistMedium capitalize text-[1.2rem]"
             >
               {title}
@@ -54,7 +54,7 @@ const CategoryCard = ({
           <ThemedIcon
             source={icons["arrow"]}
             className=" w-[15px] h-[15px] rotate-[-45deg]"
-            toggleOnDark={isPaper}
+            toggleOnDark={false}
           />
         </View>
       </Pressable>
