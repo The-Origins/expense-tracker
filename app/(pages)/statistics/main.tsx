@@ -41,7 +41,7 @@ const Statistics = () => {
                   toggleOnDark={false}
                   className=" capitalize font-urbanistBold text-[2rem] "
                 >
-                  -Ksh{formatAmount(statistics.total, 10000)}
+                  -Ksh {formatAmount(statistics.total, 10000)}
                 </ThemedText>
               </View>
               {statistics.average && (
@@ -53,7 +53,7 @@ const Statistics = () => {
                     toggleOnDark={false}
                     className="capitalize font-urbanistMedium text-[1.1rem]  "
                   >
-                    -Ksh{formatAmount(statistics.average.amount, 100000 )} per{" "}
+                    -Ksh {formatAmount(statistics.average.amount, 10000)} per{" "}
                     {statistics.average.unit}
                   </ThemedText>
                 </View>
@@ -74,6 +74,8 @@ const Statistics = () => {
                 width={width}
                 height={200}
                 withInnerLines={false}
+                formatYLabel={(label) => formatAmount(Number(label), 1000)}
+                yLabelsOffset={15}
                 fromZero={true}
                 chartConfig={{
                   backgroundColor: "#D8DFE9",

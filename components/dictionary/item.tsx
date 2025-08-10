@@ -1,3 +1,4 @@
+import { colorCycle } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
 import { DictionaryItem } from "@/types/common";
 import React, { useMemo } from "react";
@@ -16,35 +17,27 @@ const DictionaryItemComponent = ({
   index: number;
   item: DictionaryItem;
   type: "keywords" | "recipients";
-  selected: Set<string>;
+  selected: boolean;
   selectMode: boolean;
-  handleItemSelect: (
-    id: string,
-    action: "add" | "delete",
-    type: "keywords" | "recipients"
-  ) => void;
-  handleItemEdit: (index: number, type: "keywords" | "recipients") => void;
+  handleItemSelect: (id: string, action: "add" | "delete") => void;
+  handleItemEdit: (index: number) => void;
 }) => {
   const formattedType = useMemo<"keyword" | "recipient">(
     () => (type === "keywords" ? "keyword" : "recipient"),
     [type]
   );
-  const picked = useMemo<boolean>(
-    () => selected.has(item.id),
-    [item, selected]
-  );
 
   const handleLongPress = () => {
-    if (!picked) {
-      handleItemSelect(item.id, "add", type);
+    if (!selected) {
+      handleItemSelect(item.id, "add");
     }
   };
 
   const handlePress = () => {
     if (selectMode) {
-      handleItemSelect(item.id, picked ? "delete" : "add", type);
+      handleItemSelect(item.id, selected ? "delete" : "add");
     } else {
-      handleItemEdit(index, type);
+      handleItemEdit(index);
     }
   };
 
@@ -52,12 +45,12 @@ const DictionaryItemComponent = ({
     <Pressable
       onPress={handlePress}
       onLongPress={handleLongPress}
-      className={` flex-row items-center gap-2 p-[20px] rounded-[20px] ${type === "keywords" ? "bg-primary" : "bg-secondary"} `}
+      className={` flex-row items-center gap-2 p-[20px] rounded-[20px] bg-${colorCycle[index % 3]} `}
     >
       <View className=" flex-1 flex-col gap-1 ">
         {selectMode && (
           <Image
-            source={icons.checkbox[picked ? "checked" : "unchecked"]}
+            source={icons.checkbox[selected ? "checked" : "unchecked"]}
             className=" w-[15px] h-[15px] "
           />
         )}

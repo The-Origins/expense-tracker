@@ -15,26 +15,28 @@ import { Pressable, ScrollView, View } from "react-native";
 const EditDictionaryItem = () => {
   const { mode, type } = useLocalSearchParams();
 
-  const { itemInfo, data, setData } = useAppProps() as {
-    data: {
-      recipients: DictionaryItem[];
-      keywords: DictionaryItem[];
+  const { itemIndex, data, setData, setCollections, setQueryParams } =
+    useAppProps() as {
+      data: DictionaryItem[];
+      itemIndex: number;
+      setData: React.Dispatch<React.SetStateAction<DictionaryItem[]>>;
+      setCollections: React.Dispatch<
+        React.SetStateAction<{
+          keywords: number;
+          recipients: number;
+        } | null>
+      >;
+      setQueryParams: React.Dispatch<
+        React.SetStateAction<{
+          type: "keywords" | "recipients";
+          search: string;
+        } | null>
+      >;
     };
-    itemInfo: {
-      index: number;
-      type: "keywords" | "recipients";
-    };
-    setData: React.Dispatch<
-      React.SetStateAction<{
-        recipients: DictionaryItem[];
-        keywords: DictionaryItem[];
-      }>
-    >;
-  };
 
   const item = useMemo<Partial<DictionaryItem>>(
-    () => (mode === "edit" && data[itemInfo.type][itemInfo.index]) || {},
-    [data, itemInfo]
+    () => (mode === "edit" && data[itemIndex]) || {},
+    [data, itemIndex]
   );
   const formattedType = useMemo<"keyword" | "recipient">(
     () => (type === "keywords" ? "keyword" : "recipient"),
@@ -145,19 +147,22 @@ const EditDictionaryItem = () => {
             formattedType,
             mode === "edit" ? "update" : "add"
           );
-          setData((prev) => {
-            if (mode === "edit") {
-              prev[itemInfo.type][itemInfo.index] = {
+          if (mode === "edit") {
+            setData((prev) => {
+              prev[itemIndex] = {
                 ...item,
                 ...newItem,
               } as DictionaryItem;
-            } else {
-              prev[itemInfo.type] = [
-                newItem as DictionaryItem,
-                ...prev[itemInfo.type],
-              ];
+              return prev;
+            });
+          } else {
+            setQueryParams((prev) => (prev ? { ...prev } : prev));
+          }
+          setCollections((prev) => {
+            if (prev) {
+              prev[type as "keywords" | "recipients"] += 1;
             }
-            return prev;
+            return prev ? { ...prev } : prev;
           });
           handleStatusClose();
         }

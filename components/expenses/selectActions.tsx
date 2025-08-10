@@ -14,10 +14,12 @@ const SelectActions = ({
   collection,
   selected,
   resetSelected,
+  setSelectMode,
 }: {
   collection: string;
   selected: Set<number>;
   resetSelected: () => void;
+  setSelectMode: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const [status, setStatus] = useState<Status>({
     open: false,
@@ -29,6 +31,11 @@ const SelectActions = ({
   });
   const [exportModal, setExportModal] = useState<boolean>(false);
   const [moveModal, setMoveModal] = useState<boolean>(false);
+
+  const handleReset = () => {
+    resetSelected();
+    setSelectMode(false);
+  };
 
   const {
     expenses,
@@ -85,7 +92,7 @@ const SelectActions = ({
         setCollections(results.collections);
       }
       handleStatusClose();
-      resetSelected();
+      handleReset();
     } catch (error) {
       setStatus({
         open: true,
@@ -104,7 +111,7 @@ const SelectActions = ({
     setExportModal(true);
   };
   const handleExportModalSubmit = (properties: Set<string>, format: string) => {
-    resetSelected();
+    handleReset();
   };
 
   const handleEdit = () => {
@@ -149,7 +156,7 @@ const SelectActions = ({
       setCollections(results.collections);
     }
     handleStatusClose();
-    resetSelected();
+    handleReset();
   };
 
   const onDelete = () => {
@@ -175,7 +182,7 @@ const SelectActions = ({
           try {
             await handleDelete("collection");
             handleStatusClose();
-            resetSelected();
+            handleReset();
           } catch (error) {
             console.log(error);
             setStatus({

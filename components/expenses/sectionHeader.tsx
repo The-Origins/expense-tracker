@@ -1,7 +1,7 @@
 import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
 import { useThemeContext } from "@/context/themeContext";
-import React, { useEffect, useMemo } from "react";
+import React from "react";
 import { Image, Pressable, View } from "react-native";
 import ThemedText from "../themedText";
 
@@ -9,40 +9,28 @@ const ExpenseSectionHeader = React.memo(
   ({
     section,
     selectMode,
-    selectAll,
     selected,
     handleSectionSelect,
   }: {
     section: { id: string; data: number[] };
     selectMode: boolean;
-    selectAll: boolean | null;
-    selected: Set<number> | undefined;
+    selected: boolean;
     handleSectionSelect: (
       section: { id: string; data: number[] },
       selectAll: boolean
     ) => void;
   }) => {
     const { theme } = useThemeContext();
-    const picked = useMemo(
-      () => !!(selected?.size === section.data.length),
-      [selected]
-    );
     const handleSelect = () => {
-      handleSectionSelect(section, !picked);
+      handleSectionSelect(section, !selected);
     };
-
-    useEffect(() => {
-      if (selectAll !== null) {
-        handleSectionSelect(section, selectAll);
-      }
-    }, [selectAll]);
 
     return (
       <View className=" flex-row justify-between items-center ">
         <ThemedText className=" text-divider ">{section.id}</ThemedText>
         <Pressable style={{ zIndex: 100 }} onPress={handleSelect}>
           <Image
-            source={icons.checkbox[picked ? "checked" : "unchecked"]}
+            source={icons.checkbox[selected ? "checked" : "unchecked"]}
             tintColor={
               selectMode
                 ? theme === "dark"

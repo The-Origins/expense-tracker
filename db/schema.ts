@@ -1,6 +1,6 @@
 import * as SQLite from "expo-sqlite";
 
-const db = SQLite.openDatabaseSync("data.db");
+const db = SQLite.openDatabaseSync("app.db");
 
 export const init = async () => {
   try {
@@ -30,6 +30,8 @@ export const init = async () => {
     INSERT OR IGNORE INTO collections (name, count) VALUES ('expenses', 0);
     INSERT OR IGNORE INTO collections (name, count) VALUES ('failed', 0);
     INSERT OR IGNORE INTO collections (name, count) VALUES ('trash', 0);
+    INSERT OR IGNORE INTO collections (name, count) VALUES ('keywords', 0);
+    INSERT OR IGNORE INTO collections (name, count) VALUES ('recipients', 0);
 
     CREATE TABLE IF NOT EXISTS statistics (
       path TEXT PRIMARY KEY,

@@ -273,7 +273,7 @@ const EditExpenses = () => {
                     index: item,
                     expense: expenses[item],
                     editMode: true,
-                    selected: editSelected,
+                    selected: editSelected.has(item),
                     selectMode,
                     handleSelectItem,
                     setReceiptModal,

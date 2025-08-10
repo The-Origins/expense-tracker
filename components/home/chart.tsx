@@ -106,6 +106,8 @@ const HomeChart = ({
             height={200}
             withInnerLines={false}
             fromZero={true}
+            formatYLabel={(label) => formatAmount(Number(label), 1000)}
+            yLabelsOffset={20}
             chartConfig={{
               backgroundColor: "#D8DFE9",
               backgroundGradientFrom: "#D8DFE9",

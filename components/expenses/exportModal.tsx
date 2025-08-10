@@ -5,26 +5,27 @@ import ThemedIcon from "../themedIcon";
 import ThemedText from "../themedText";
 
 const options = [
-  "Titles",
-  "Categories",
-  "Recipients",
-  "Amounts",
-  "Reference IDs",
-  "Receipts",
-  "Images",
+  { title: "Titles", value: "title" },
+  { title: "Categories", value: "category" },
+  { title: "Recipients", value: "recipient" },
+  { title: "Amounts", value: "amount" },
+  { title: "Reference IDs", value: "ref" },
+  { title: "Receipts", value: "receipt" },
 ];
 
-const ExportModal = ({
+const values = ["title", "category", "recipient", "amount", "ref", "receipt"];
+
+const ExpensesExportModal = ({
   open,
   handleClose,
   handleSubmit,
 }: {
   open: boolean;
   handleClose: () => void;
-  handleSubmit: (properties: Set<string>, format: string) => void;
+  handleSubmit: (properties: Set<string>, images: boolean) => void;
 }) => {
-  const [format, setFormat] = useState<string>("csv");
-  const [selection, setSelection] = useState<Set<string>>(new Set(options));
+  const [images, setImages] = useState<boolean>(true);
+  const [selection, setSelection] = useState<Set<string>>(new Set(values));
   const allSelected = useMemo(
     () => selection.size === options.length,
     [selection, options]
@@ -46,12 +47,12 @@ const ExportModal = ({
     if (allSelected) {
       setSelection(new Set());
     } else {
-      setSelection(new Set(options));
+      setSelection(new Set(values));
     }
   };
 
   const onSubmit = () => {
-    handleSubmit(selection, format);
+    handleSubmit(selection, images);
     handleClose();
   };
 
@@ -101,7 +102,7 @@ const ExportModal = ({
                 {options.map((option, index) => (
                   <Pressable
                     key={index}
-                    onPress={() => handleSelect(option)}
+                    onPress={() => handleSelect(option.value)}
                     className={
                       " ml-[25px] pt-[5px] pb-[5px] flex-row items-center gap-2 "
                     }
@@ -109,48 +110,16 @@ const ExportModal = ({
                     <ThemedIcon
                       source={
                         icons.checkbox[
-                          selection.has(option) ? "checked" : "unchecked"
+                          selection.has(option.value) ? "checked" : "unchecked"
                         ]
                       }
                       className=" w-[20px] h-[20px] "
                     />
                     <ThemedText className=" capitalize text-[1.1rem] ">
-                      {option}
+                      {option.title}
                     </ThemedText>
                   </Pressable>
                 ))}
-              </View>
-
-              <ThemedText className=" text-[1.2rem] font-urbanistMedium ">
-                Format
-              </ThemedText>
-              <View className={" flex-row gap-[20px] "}>
-                <Pressable
-                  onPress={() => setFormat("csv")}
-                  className={" flex-row items-center gap-2 "}
-                >
-                  <ThemedIcon
-                    source={
-                      icons.checkbox[format === "csv" ? "checked" : "unchecked"]
-                    }
-                    className=" w-[20px] h-[20px] "
-                  />
-                  <ThemedText className=" font-urbanistMedium ">CSV</ThemedText>
-                </Pressable>
-                <Pressable
-                  onPress={() => setFormat("excel")}
-                  className={" flex-row items-center gap-2 "}
-                >
-                  <ThemedIcon
-                    source={
-                      icons.checkbox[
-                        format === "excel" ? "checked" : "unchecked"
-                      ]
-                    }
-                    className=" w-[20px] h-[20px] "
-                  />
-                  <ThemedText className=" font-urbanistMedium ">EXCEL</ThemedText>
-                </Pressable>
               </View>
             </View>
           </ScrollView>
@@ -177,4 +146,4 @@ const ExportModal = ({
   );
 };
 
-export default ExportModal;
+export default ExpensesExportModal;

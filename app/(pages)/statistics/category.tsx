@@ -109,10 +109,10 @@ const CategoryStatistics = () => {
             </ThemedText>
           )}
           <ThemedText className=" capitalize font-urbanistBold text-[1.2rem] ">
-            -
+            -Ksh{" "}
             {highlight
-              ? "Ksh" + formatAmount(parsedData[highlight - 1].amount, 10000)
-              : total}
+              ? formatAmount(parsedData[highlight - 1].amount, 10000)
+              : formatAmount(Number(total), 10000)}
           </ThemedText>
           <ThemedText className=" capitalize text-center w-[80%] ">
             {highlight ? parsedData[highlight - 1].name : category}

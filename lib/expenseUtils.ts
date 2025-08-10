@@ -56,7 +56,7 @@ export const getExpenses = async ({
     const offset = (page - 1) * limit;
     query += ` LIMIT ${limit} OFFSET ${offset}`;
   }
-  const expenses = await db.getAllAsync(query);
+  const expenses: Partial<Expense>[] = await db.getAllAsync(query);
   return expenses;
 };
 
@@ -216,8 +216,8 @@ export const updateExpense = async (
     const values = Object.values(expense);
     if (mode === "add") {
       if (expense.image) {
-        const uri = await saveImage(expense.image);
-        expense.image = uri;
+        const fileName = await saveImage(expense.image);
+        expense.image = fileName;
       }
 
       operations.push(
@@ -236,8 +236,8 @@ export const updateExpense = async (
     if (mode === "update" && expense.id) {
       if (expense.image && previousExpense && previousExpense.image) {
         operations.push(deleteImage(previousExpense.image));
-        const uri = await saveImage(expense.image);
-        expense.image = uri;
+        const fileName = await saveImage(expense.image);
+        expense.image = fileName;
       }
       operations.push(
         db.runAsync(
@@ -250,27 +250,24 @@ export const updateExpense = async (
     }
   }
 
+  const statisticsUpdate =
+    previousExpense &&
+    (expense.amount || expense.title || expense.category) &&
+    previousExpense.amount &&
+    previousExpense.title &&
+    previousExpense.category;
+
   if (!isTrash && !isFailed) {
-    if (
-      mode === "delete" ||
-      (mode === "update" &&
-        previousExpense &&
-        (previousExpense.amount ||
-          previousExpense.title ||
-          previousExpense.category))
-    ) {
+    if (mode === "delete" || (mode === "update" && statisticsUpdate)) {
+      console.log("deleted");
       updateStatistics(previousExpense || expense, operations, "delete");
       operations.push(
         updateBudgetsAndItems(previousExpense || expense, "delete")
       );
     }
 
-    if (
-      mode === "add" ||
-      (mode === "update" &&
-        previousExpense &&
-        (expense.amount || expense.title || expense.category))
-    ) {
+    if (mode === "add" || (mode === "update" && statisticsUpdate)) {
+      console.log("added");
       updateStatistics({ ...previousExpense, ...expense }, operations);
       operations.push(
         updateBudgetsAndItems({ ...previousExpense, ...expense }, "add")

@@ -23,7 +23,7 @@ const ExpenseCard = React.memo(
     index: number;
     editMode?: boolean;
     expense: Partial<Expense>;
-    selected: Set<number> | undefined;
+    selected: boolean;
     selectMode: boolean;
     sectionId?: string;
     handleSelectItem: (
@@ -34,7 +34,6 @@ const ExpenseCard = React.memo(
     handleItemEdit: (index: number) => void;
     setReceiptModal: React.Dispatch<React.SetStateAction<ReceiptModal>>;
   }) => {
-    const picked = useMemo(() => !!selected?.has(index), [selected]);
     const [expand, setExpand] = useState<boolean>(false);
     const error = useMemo<boolean>(
       () => expense.collection === "failed",
@@ -42,14 +41,14 @@ const ExpenseCard = React.memo(
     );
 
     const handleLongPress = () => {
-      if (!picked) {
+      if (!selected) {
         handleSelectItem(index, "add", sectionId);
       }
     };
 
     const handlePress = () => {
       if (selectMode) {
-        handleSelectItem(index, picked ? "delete" : "add", sectionId);
+        handleSelectItem(index, selected ? "delete" : "add", sectionId);
       } else {
         if (editMode) {
           onEdit();
@@ -71,6 +70,7 @@ const ExpenseCard = React.memo(
       });
     };
 
+    console.log("rendered: ", index);
     return (
       <Pressable
         onLongPress={handleLongPress}
@@ -82,8 +82,8 @@ const ExpenseCard = React.memo(
             {selectMode && (
               <ThemedIcon
                 toggleOnDark={false}
-                source={icons.checkbox[picked ? "checked" : "unchecked"]}
-                className=" w-[15px] h-[15px] "
+                source={icons.checkbox[selected ? "checked" : "unchecked"]}
+                className=" w-[15px] h-[15px]"
               />
             )}
             {!editMode && (

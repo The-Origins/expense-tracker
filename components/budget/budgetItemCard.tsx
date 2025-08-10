@@ -6,6 +6,7 @@ import { Pressable, View } from "react-native";
 import { ProgressChart } from "react-native-chart-kit";
 import ThemedIcon from "../themedIcon";
 import ThemedText from "../themedText";
+import { formatAmount } from "@/lib/appUtils";
 
 const BudgetItemCard = ({
   index,
@@ -74,7 +75,7 @@ const BudgetItemCard = ({
             toggleOnDark={false}
             className={` font-urbanistBold text-[1.5rem] ${expired ? "text-divider" : ""} `}
           >
-            {item.total}
+            {formatAmount(item.total, 10000)}
           </ThemedText>
           <ThemedText
             toggleOnDark={false}
@@ -86,7 +87,7 @@ const BudgetItemCard = ({
             >
               Total:{" "}
             </ThemedText>
-            {item.current}
+            {formatAmount(item.current, 10000)}
           </ThemedText>
         </View>
         <View className=" relative w-[60px] h-[60px] ">

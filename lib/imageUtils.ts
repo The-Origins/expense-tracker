@@ -2,7 +2,29 @@ import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import * as MediaLibrary from "expo-media-library";
 
-export const takeImage = async () => {};
+export const requestCameraPermissions = async () => {
+  const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  return status === "granted";
+};
+
+export const takeImage = async () => {
+  const permitted = await requestCameraPermissions();
+
+  if (!permitted) {
+    return null;
+  }
+
+  const result = await ImagePicker.launchCameraAsync({
+    mediaTypes: ["images"],
+    quality: 1, // best quality
+  });
+
+  if (result.canceled) {
+    return null;
+  }
+
+  return result.assets[0].uri;
+};
 
 export const pickImage = async () => {
   let result = await ImagePicker.launchImageLibraryAsync({
@@ -21,15 +43,15 @@ export const pickImage = async () => {
 
 export const saveImage = async (uri: string) => {
   const fileName = uri.split("/").pop();
-  const newPath = `${FileSystem.documentDirectory}${fileName}`;
   await FileSystem.copyAsync({
     from: uri,
-    to: newPath,
+    to: `${FileSystem.documentDirectory}images/${fileName}`,
   });
-  return newPath;
+  return fileName;
 };
 
-export const deleteImage = async (uri: string) => {
+export const deleteImage = async (fileName: string) => {
+  const uri = `${FileSystem.documentDirectory}images/${fileName}`;
   await FileSystem.deleteAsync(uri);
 };
 

@@ -21,3 +21,18 @@ export const formatAmount = (amount: number, max: number = 1000) => {
     amount.toLocaleString(undefined, { maximumFractionDigits: 1 }) + suffix
   );
 };
+
+export const getDateSuffix = (date: string) => {
+  const lastChar = date.slice(-1);
+  switch (lastChar) {
+    case "1":
+      return "st";
+    case "2":
+      return "nd";
+    case "3":
+      return "rd";
+
+    default:
+      return "th";
+  }
+};

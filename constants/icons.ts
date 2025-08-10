@@ -10,6 +10,7 @@ const icons = {
     filled: require("../assets/images/budget-filled.png"),
     outlined: require("../assets/images/budget-outlined.png"),
   },
+  camera: require("../assets/images/camera.png"),
   check: require("../assets/images/check.png"),
   checkbox: {
     checked: require("../assets/images/checkbox-checked.png"),
@@ -35,6 +36,7 @@ const icons = {
   info: require("../assets/images/info.png"),
   keyword: require("../assets/images/keyword.png"),
   link: require("../assets/images/link.png"),
+  lock: require("../assets/images/lock.png"),
   logout: require("../assets/images/logout.png"),
   money: require("../assets/images/money.png"),
   move: require("../assets/images/move.png"),

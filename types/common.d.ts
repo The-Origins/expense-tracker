@@ -39,8 +39,6 @@ export type ExpenseFormErrors = {
 export type QueryParameters = {
   search?: string;
   collection?: string;
-  limit?: number;
-  page?: number;
   ids?: string[];
 };
 
@@ -77,7 +75,7 @@ export type BudgetForm = {
 
 export type Statistic = {
   path: string;
-  value:number;
+  value: number;
   total: number;
 };
 
@@ -117,4 +115,10 @@ export type Notification = {
   message: string;
   date: string;
   unread: boolean;
+};
+
+export type ManifestEntry = {
+  relativePath: any;
+  size: number;
+  sha256: any;
 };

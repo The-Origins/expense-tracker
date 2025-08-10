@@ -17,6 +17,7 @@ import * as Progress from "react-native-progress";
 
 const Collection = () => {
   const {
+    page,
     loading,
     expenses,
     collectionSelected,
@@ -24,7 +25,9 @@ const Collection = () => {
     queryParameters,
     setQueryParameters,
     setExpenseIndex,
+    nextPage,
   } = useAppProps() as {
+    page: number;
     loading: boolean;
     expenses: (Partial<Expense> | undefined)[];
     collectionSelected: Set<number>;
@@ -34,6 +37,7 @@ const Collection = () => {
       React.SetStateAction<QueryParameters | null>
     >;
     setExpenseIndex: React.Dispatch<React.SetStateAction<number>>;
+    nextPage: () => Promise<void>;
   };
 
   const collection = useMemo<string>(
@@ -48,10 +52,13 @@ const Collection = () => {
     return data.groups;
   }, [expenses]);
 
-  const [selected, setSelected] = useState<Map<string, Set<number>>>(new Map());
+  const [selectedSections, setSelectedSections] = useState<Map<string, number>>(
+    new Map()
+  );
 
   const [selectMode, setSelectMode] = useState<boolean>(false);
-  const [selectAll, setSelectAll] = useState<boolean | null>(null);
+  const [selectAll, setSelectAll] = useState<boolean>(false);
+  const [canGoNext, setCanGoNext] = useState<boolean>(false);
 
   const allSelected = useMemo<boolean>(
     () => collectionSelected.size === expenseIndicies.length,
@@ -86,16 +93,34 @@ const Collection = () => {
     setCollectionSelected(new Set());
   }, []);
 
+  useEffect(() => {
+    if (selectAll) {
+      setCollectionSelected(new Set(expenseIndicies));
+      setSelectedSections(
+        new Map(sections.map(({ id, data }) => [id, data.length]))
+      );
+    }
+  }, [expenseIndicies, selectAll]);
+
+  const handleHasReachedEnd = () => {
+    console.log(expenses.length, page);
+    if (!loading && canGoNext && expenses.length >= page * 10) {
+      console.log("has reached end");
+      setCanGoNext(false);
+      nextPage();
+    }
+  };
+
   const resetSelected = () => {
     setCollectionSelected(new Set());
-    setSelected(new Map());
-    setSelectMode(false);
-    setSelectAll(null);
+    setSelectedSections(new Map());
+    setSelectAll(false);
   };
 
   const handleTitleBtnClick = () => {
     if (selectMode) {
       resetSelected();
+      setSelectMode(false);
     } else {
       router.back();
     }
@@ -104,10 +129,8 @@ const Collection = () => {
   const handleSelectAll = () => {
     if (selectMode) {
       if (allSelected) {
-        setCollectionSelected(new Set());
-        setSelectAll(false);
+        resetSelected();
       } else {
-        setCollectionSelected(new Set(expenseIndicies));
         setSelectAll(true);
       }
     } else {
@@ -133,9 +156,10 @@ const Collection = () => {
       if (!selectMode) {
         setSelectMode(true);
       }
-      setSelected((prev) => {
-        prev.set(section.id, new Set(selectAll ? section.data : undefined));
-        return prev;
+      setSelectedSections((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(section.id, selectAll ? section.data.length : 0);
+        return newMap;
       });
       setCollectionSelected((prev) => {
         const newSet = new Set(prev);
@@ -158,11 +182,16 @@ const Collection = () => {
         if (!selectMode) {
           setSelectMode(true);
         }
-        setSelected((prev) => {
-          const newSet = new Set(prev.get(sectionId));
-          newSet[action](index);
-          prev.set(sectionId, newSet);
-          return prev;
+        setSelectedSections((prev) => {
+          const newMap = new Map(prev);
+          let count = newMap.get(sectionId) || 0;
+          if (action === "delete") {
+            count -= 1;
+          } else {
+            count += 1;
+          }
+          newMap.set(sectionId, count);
+          return newMap;
         });
         setCollectionSelected((prev) => {
           const newSet = new Set(prev);
@@ -220,6 +249,7 @@ const Collection = () => {
                 {...{
                   collection: collection as string,
                   selected: collectionSelected,
+                  setSelectMode,
                   resetSelected,
                 }}
               />
@@ -251,11 +281,7 @@ const Collection = () => {
             )}
           </View>
         </View>
-        {loading ? (
-          <View className=" flex-1 flex-row justify-center items-center ">
-            <Progress.CircleSnail color={["#3b82f6", "#10b981"]} />
-          </View>
-        ) : sections.length ? (
+        {sections.length ? (
           <SectionList
             sections={sections}
             showsVerticalScrollIndicator={false}
@@ -267,7 +293,7 @@ const Collection = () => {
                     editMode: collection === "failed",
                     sectionId: section.id,
                     expense: expenses[item],
-                    selected: selected.get(section.id),
+                    selected: collectionSelected.has(item),
                     selectMode,
                     setReceiptModal,
                     handleSelectItem,
@@ -288,8 +314,8 @@ const Collection = () => {
                 {...{
                   section,
                   selectMode,
-                  selectAll,
-                  selected: selected.get(section.id),
+                  selected:
+                    selectedSections.get(section.id) === section.data.length,
                   handleSectionSelect,
                 }}
               />
@@ -297,15 +323,30 @@ const Collection = () => {
             renderSectionFooter={({ section }) => (
               <View className=" p-[20px] " />
             )}
+            ListFooterComponent={() => (
+              <View className=" flex-row items-center justify-center ">
+                {loading && (
+                  <Progress.CircleSnail color={["#3b82f6", "#10b981"]} />
+                )}
+              </View>
+            )}
+            onEndReached={handleHasReachedEnd}
+            onMomentumScrollBegin={() => setCanGoNext(true)}
           />
         ) : (
           <View className=" flex-1 flex-col gap-[10px] justify-center items-center ">
-            <Image
-              source={icons.money}
-              className=" w-[50px] h-[50px] "
-              tintColor={tintColors.divider}
-            />
-            <ThemedText className=" text-[1.5rem] ">No Expenses</ThemedText>
+            {loading ? (
+              <Progress.CircleSnail color={["#3b82f6", "#10b981"]} />
+            ) : (
+              <>
+                <Image
+                  source={icons.money}
+                  className=" w-[50px] h-[50px] "
+                  tintColor={tintColors.divider}
+                />
+                <ThemedText className=" text-[1.5rem] ">No Expenses</ThemedText>
+              </>
+            )}
           </View>
         )}
       </View>

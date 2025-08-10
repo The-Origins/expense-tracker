@@ -24,19 +24,20 @@ const ExpensesLayout = () => {
   const [queryParameters, setQueryParameters] =
     useState<QueryParameters | null>(null);
 
+  const [page, setPage] = useState<number>(1);
+
   useEffect(() => {
     if (queryParameters) {
       setLoading(true);
       const fetchExpenses = async () => {
         console.log("fetched");
         const data = await getExpenses({
-          search: queryParameters?.search,
-          collection: queryParameters?.collection,
-          limit: queryParameters?.limit,
-          page: queryParameters?.page,
-          ids: queryParameters?.ids,
+          ...queryParameters,
+          page: 1,
+          limit: 10,
         });
-        setExpenses(data as (Partial<Expense> | undefined)[]);
+        setPage(1);
+        setExpenses(data);
         setLoading(false);
       };
       fetchExpenses();
@@ -44,6 +45,19 @@ const ExpensesLayout = () => {
       setLoading(false);
     }
   }, [queryParameters]);
+
+  const nextPage = async () => {
+    setLoading(true);
+    const newPage = await getExpenses({
+      ...queryParameters,
+      page: page + 1,
+      limit: 10,
+    });
+    setExpenses((prev) => prev.concat(newPage));
+    setLoading(false);
+
+    setPage((prev) => prev + 1);
+  };
 
   const getCollections = async () => {
     console.log("collections fetched");
@@ -57,7 +71,9 @@ const ExpensesLayout = () => {
       if (
         item.name !== "expenses" &&
         item.name !== "failed" &&
-        item.name !== "trash"
+        item.name !== "trash" &&
+        item.name !== "keywords" &&
+        item.name !== "recipients"
       ) {
         names.push(item.name);
       }
@@ -85,6 +101,7 @@ const ExpensesLayout = () => {
   return (
     <AppPropsProvider
       value={{
+        page,
         loading,
         setLoading,
         queryParameters,
@@ -105,6 +122,7 @@ const ExpensesLayout = () => {
         setExpenseIndex,
         handleDelete,
         getCollections,
+        nextPage,
       }}
     >
       <Slot />

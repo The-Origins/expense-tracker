@@ -6,6 +6,7 @@ import React, { useMemo } from "react";
 import { Image, Pressable, View } from "react-native";
 import { ProgressChart } from "react-native-chart-kit";
 import ThemedText from "../themedText";
+import { formatAmount } from "@/lib/appUtils";
 
 const BudgetCard = ({
   index,
@@ -81,7 +82,7 @@ const BudgetCard = ({
               toggleOnDark={false}
               className={` font-urbanistBold text-[2rem] ${expired ? "text-divider" : ""} `}
             >
-              {budget.total}
+              {formatAmount(budget.total, 10000)}
             </ThemedText>
             {editMode && (
               <ThemedText
@@ -94,7 +95,7 @@ const BudgetCard = ({
                 >
                   Total:{" "}
                 </ThemedText>
-                {budget.current}
+                {formatAmount(budget.current, 10000)}
               </ThemedText>
             )}
           </View>

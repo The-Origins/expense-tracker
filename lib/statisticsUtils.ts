@@ -1,6 +1,7 @@
 import { colorCycle, tintColors } from "@/constants/colorSettings";
 import db from "@/db/schema";
 import { Expense, Statistic } from "@/types/common";
+import { getDateSuffix } from "./appUtils";
 
 export const getTimeStatistics = async ({
   year,
@@ -91,8 +92,9 @@ export const parseData = (
     let label = String(value);
 
     if (scope === "month") {
-      label = months[value];
+      label = months[item.value];
     }
+
     if (!scope) {
       switch (value) {
         case 1:
@@ -110,7 +112,9 @@ export const parseData = (
       }
     }
 
-    labels.push(label);
+    labels.push(
+      label + `${scope === "date" ? getDateSuffix(String(value)) : ""}`
+    );
     data.push(item.total);
     options.push({ label, value });
   }

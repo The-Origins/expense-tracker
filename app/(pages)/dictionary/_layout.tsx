@@ -1,62 +1,53 @@
 import { AppPropsProvider } from "@/context/propContext";
-import {
-  getDictionaryKeywords,
-  getDictionaryRecipients,
-} from "@/lib/dictionaryUtils";
+import { getDictionaryItems } from "@/lib/dictionaryUtils";
 import { DictionaryItem } from "@/types/common";
 import { Slot } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 
 const DictionaryLayout = () => {
-  const [data, setData] = useState<{
-    recipients: DictionaryItem[];
-    keywords: DictionaryItem[];
-  }>({
-    recipients: [],
-    keywords: [],
-  });
-  const [search, setSearch] = useState<string>("");
-  const [itemInfo, setItemInfo] = useState<{
-    index: number;
-    type: "keywords" | "recipients";
-  }>({ index: 0, type: "keywords" });
-  const [page, setPage] = useState<{ keywords: number; recipients: number }>({
-    keywords: 1,
-    recipients: 1,
-  });
   const [loading, setLoading] = useState<boolean>(true);
+  const [data, setData] = useState<DictionaryItem[]>([]);
+  const [collections, setCollections] = useState<{
+    keywords: number;
+    recipients: number;
+  } | null>(null);
+  const [queryParams, setQueryParams] = useState<{
+    type: "keywords" | "recipients";
+    search: string;
+  } | null>(null);
+  const [itemIndex, setItemIndex] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
 
   useEffect(() => {
-    setPage({
-      keywords: 1,
-      recipients: 1,
-    });
-    const fetchData = async () => {
-      try {
+    if (queryParams) {
+      const fetchData = async () => {
         setLoading(true);
-        const keywords = await getDictionaryKeywords(search, 1);
-        const recipients = await getDictionaryRecipients(search, 1);
-
-        setData({ keywords, recipients });
+        const items = await getDictionaryItems(
+          queryParams.type,
+          queryParams.search,
+          1,
+          10
+        );
+        setData(items);
         setLoading(false);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchData();
-  }, [search]);
-
-  const nextPage = async (type: "keywords" | "recipients") => {
-    let newPage: DictionaryItem[] = [];
-    if (type === "keywords") {
-      newPage = await getDictionaryKeywords(search, page.keywords + 1);
-    } else if (type === "recipients") {
-      newPage = await getDictionaryRecipients(search, page.recipients + 1);
+      };
+      fetchData();
     }
+  }, [queryParams]);
 
-    setData((prev) => ({ ...prev, [type]: [...prev[type], ...newPage] }));
-    setPage((prev) => ({ ...prev, [type]: prev[type] + 1 }));
+  const nextPage = async () => {
+    if (!queryParams) return;
+    setLoading(true);
+    const newPage = await getDictionaryItems(
+      queryParams.type,
+      queryParams.search,
+      page + 1,
+      10
+    );
+    setData((prev) => prev.concat(newPage));
+    setPage((prev) => prev + 1);
+    setLoading(false);
   };
 
   return (
@@ -64,12 +55,14 @@ const DictionaryLayout = () => {
       value={{
         data,
         setData,
-        search,
-        setSearch,
-        itemInfo,
-        setItemInfo,
+        collections,
+        setCollections,
+        itemIndex,
+        setItemIndex,
         page,
         setPage,
+        queryParams,
+        setQueryParams,
         loading,
         setLoading,
         nextPage,

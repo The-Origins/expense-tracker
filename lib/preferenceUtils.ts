@@ -20,14 +20,14 @@ export const setPreferences = async (preferences: Record<string, string>) => {
   const keys = Object.keys(preferences);
   await db.withTransactionAsync(async () => {
     await db.runAsync(
-      `DELETE FROM preferences WHERE key IN (?${`, ?`.repeat(keys.length - 1)})`
+      `DELETE FROM preferences WHERE key IN (?${`, ?`.repeat(keys.length - 1)})`,
+      keys
     );
 
     let query = "";
     for (let key of keys) {
       query += `INSERT INTO preferences (key, value) VALUES ('${key}' ,'${preferences[key]}');`;
     }
-    console.log("query: ", query);
     await db.execAsync(query);
   });
 };

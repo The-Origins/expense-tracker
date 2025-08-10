@@ -1,3 +1,4 @@
+import SelectImageModal from "@/components/expenses/selectImageModal";
 import InputField from "@/components/inputField";
 import StatusModal from "@/components/statusModal";
 import ThemedIcon from "@/components/themedIcon";
@@ -5,10 +6,9 @@ import ThemedText from "@/components/themedText";
 import { tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
-import { normalizeString } from "@/lib/appUtils";
 import { pasteFromClipboard } from "@/lib/clipboardUtils";
 import { updateExpense } from "@/lib/expenseUtils";
-import { pickImage } from "@/lib/imageUtils";
+import { importExpenses, selectExpensesImport } from "@/lib/exportUtils";
 import validateInput from "@/lib/validateInput";
 import {
   Expense,
@@ -24,6 +24,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Image, Platform, Pressable, ScrollView, View } from "react-native";
 import * as Progress from "react-native-progress";
+import Toast from "react-native-root-toast";
 
 const EditExpense = () => {
   const { ids, mode } = useLocalSearchParams();
@@ -38,6 +39,7 @@ const EditExpense = () => {
     setCollections,
     setCollectionNames,
     setQueryParameters,
+    setCollectionSelected,
   } = useAppProps() as {
     loading: boolean;
     setExpenses: React.Dispatch<
@@ -53,6 +55,7 @@ const EditExpense = () => {
     setQueryParameters: React.Dispatch<
       React.SetStateAction<QueryParameters | null>
     >;
+    setCollectionSelected: React.Dispatch<React.SetStateAction<Set<number>>>;
   };
 
   const expense = useMemo<Partial<Expense>>(
@@ -81,6 +84,7 @@ const EditExpense = () => {
   });
   const [touched, setTouched] = useState<Set<string>>(new Set());
   const [changes, setChanges] = useState<Map<string, string>>(new Map());
+  const [imageModal, setImageModal] = useState<boolean>(false);
 
   const [datePicker, setDatePicker] = useState<{
     open: boolean;
@@ -141,7 +145,7 @@ const EditExpense = () => {
         form,
         name !== "ref" && name !== "receipt",
         undefined,
-        name !== "amount" ? (name === "receipt" ? 200 : 30) : undefined
+        name !== "amount" ? (name === "receipt" ? 400 : 30) : undefined
       ),
     }));
     setForm((prev) => ({
@@ -183,6 +187,39 @@ const EditExpense = () => {
         callback() {},
       },
     });
+  };
+
+  const handleImport = async () => {
+    try {
+      const uri = await selectExpensesImport();
+      setStatus({
+        open: true,
+        type: "loading",
+        title: "Importing expenses",
+        message: "This may take a while.",
+        handleClose: handleStatusClose,
+        action: {
+          callback() {},
+        },
+      });
+      const data = await importExpenses(uri);
+      setCollections(null);
+      setCollectionSelected(
+        new Set(
+          Array.from({ length: data.length }, (_, i) => i + expenses.length)
+        )
+      );
+      setExpenses((prev) => prev.concat(data));
+
+      router.replace("/expenses/edit/main");
+    } catch (error: any) {
+      Toast.show(
+        error.cause === 1
+          ? error.message
+          : `There was an error importing expenses`,
+        { duration: Toast.durations.SHORT }
+      );
+    }
   };
 
   const handleSave = async () => {
@@ -228,6 +265,7 @@ const EditExpense = () => {
           } else {
             change.collection = change.category;
             await updateExpense(change, "add");
+            setQueryParameters((prev) => (prev ? { ...prev } : prev));
             setCollections((prev: Map<string, number> | null) => {
               if (prev) {
                 const newMap = new Map(prev);
@@ -268,45 +306,38 @@ const EditExpense = () => {
   const handleReceiptPaste = async () => {
     try {
       const text = await pasteFromClipboard();
-      setForm((prev) => ({ ...prev, receipt: text }));
-      setErrors((prev) => ({
-        ...prev,
-        receipt: validateInput("receipt", text, {}, false, undefined, 200),
-      }));
-      const normalized = normalizeString(text);
-      if (normalized !== expense.receipt?.toLowerCase()) {
+      if (text) {
+        Toast.show(`Pasted receipt`, { duration: Toast.durations.SHORT });
+        setForm((prev) => ({ ...prev, receipt: text }));
+        setErrors((prev) => ({
+          ...prev,
+          receipt: validateInput("receipt", text, {}, false, undefined, 400),
+        }));
         setChanges((prev) => {
           const newMap = new Map(prev);
-          newMap.set("receipt", normalized);
+          newMap.set("receipt", text);
           return newMap;
         });
+      } else {
+        Toast.show(`Nothing to paste`, { duration: Toast.durations.SHORT });
       }
     } catch (error) {
-      alert(error);
+      Toast.show(`There was an error pasting from clipboard`);
     }
   };
 
-  const handleImageSelect = async () => {
-    const uri = await pickImage();
-    if (!uri) {
-      setStatus({
-        open: true,
-        type: "info",
-        title: "Operation canceled",
-        message: "No Image selected",
-        handleClose: handleStatusClose,
-        action: {
-          callback: handleStatusClose,
-        },
-      });
-      return;
-    }
+  const handleImageChange = async () => {
+    setImageModal(true);
+  };
+
+  const handleImageSubmit = async (uri: string) => {
     setForm((prev) => ({ ...prev, image: uri }));
     setChanges((prev) => {
       const newMap = new Map(prev);
       newMap.set("image", uri);
       return newMap;
     });
+    setImageModal(false);
   };
 
   const handleReceiptsImport = () => {
@@ -465,7 +496,7 @@ const EditExpense = () => {
                   Image
                 </ThemedText>
                 <Pressable
-                  onPress={handleImageSelect}
+                  onPress={handleImageChange}
                   className={` relative overflow-hidden rounded-[20px] flex-row aspect-square border ${changes.has("image") ? "border-info" : "border-divider"} `}
                 >
                   {form.image && (
@@ -529,6 +560,11 @@ const EditExpense = () => {
         <></>
       )}
       <StatusModal status={status} />
+      <SelectImageModal
+        open={imageModal}
+        handleClose={() => setImageModal(false)}
+        handleSubmit={handleImageSubmit}
+      />
     </>
   );
 };

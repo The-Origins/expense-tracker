@@ -4,6 +4,7 @@ import { copyToClipboard } from "@/lib/clipboardUtils";
 import { dowloadImage } from "@/lib/imageUtils";
 import React from "react";
 import { Image, Modal, Pressable, ScrollView, View } from "react-native";
+import Toast from "react-native-root-toast";
 import ThemedIcon from "../themedIcon";
 import ThemedText from "../themedText";
 
@@ -22,9 +23,18 @@ const ViewRecieptModal = ({
     try {
       if (receipt) {
         await copyToClipboard(receipt);
+        Toast.show(`Copied receipt to clipboard`, {
+          duration: Toast.durations.SHORT,
+        });
+      } else {
+        Toast.show(`No receipt`, {
+          duration: Toast.durations.SHORT,
+        });
       }
     } catch (error) {
-      alert(error);
+      Toast.show(`There was an error copying receipt`, {
+        duration: Toast.durations.SHORT,
+      });
     }
   };
 
@@ -32,13 +42,19 @@ const ViewRecieptModal = ({
     try {
       if (image) {
         await dowloadImage(image);
-        alert(`Image downloaded`);
+        Toast.show(`Image Downloaded`, {
+          duration: Toast.durations.SHORT,
+        });
       } else {
-        throw new Error(`No Image`);
+        Toast.show(`No Image`, {
+          duration: Toast.durations.SHORT,
+        });
       }
     } catch (error) {
       console.log(error);
-      alert(error);
+      Toast.show(`There was an error downloading image`, {
+        duration: Toast.durations.SHORT,
+      });
     }
   };
 

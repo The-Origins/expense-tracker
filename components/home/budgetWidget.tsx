@@ -1,5 +1,6 @@
 import { getPercentColor, tintColors } from "@/constants/colorSettings";
 import icons from "@/constants/icons";
+import { formatAmount } from "@/lib/appUtils";
 import { getBudgets } from "@/lib/budgetUtils";
 import { Budget } from "@/types/common";
 import { router } from "expo-router";
@@ -87,7 +88,7 @@ const HomeBudgetWidget = () => {
               toggleOnDark={false}
               className={` font-urbanistBold text-[1.5rem] `}
             >
-              {budget.total}
+              {formatAmount(budget.total, 10000)}
             </ThemedText>
             <ThemedText
               toggleOnDark={false}
@@ -99,7 +100,7 @@ const HomeBudgetWidget = () => {
               >
                 Total:{" "}
               </ThemedText>
-              {budget.current}
+              {formatAmount(budget.current, 10000)}
             </ThemedText>
           </View>
           <View className=" flex-row items-center">

@@ -4,11 +4,13 @@ import ThemedIcon from "@/components/themedIcon";
 import ThemedText from "@/components/themedText";
 import icons from "@/constants/icons";
 import { useAppProps } from "@/context/propContext";
+import { pasteFromClipboard } from "@/lib/clipboardUtils";
 import { parseReceipts } from "@/lib/expenseUtils";
 import { Expense, Status } from "@/types/common";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
+import Toast from "react-native-root-toast";
 
 const Receipt = () => {
   const [receipt, setReceipt] = useState<string>("");
@@ -19,8 +21,9 @@ const Receipt = () => {
     action: { callback() {} },
   });
 
-  const { setExpenses, setCollectionSelected, setCollections } =
+  const { expenses, setExpenses, setCollectionSelected, setCollections } =
     useAppProps() as {
+      expenses: (Partial<Expense> | undefined)[];
       setExpenses: React.Dispatch<
         React.SetStateAction<(Partial<Expense> | undefined)[]>
       >;
@@ -34,7 +37,11 @@ const Receipt = () => {
     setReceipt(value);
   };
 
-  const handlePaste = () => {};
+  const handlePaste = async () => {
+    const text = await pasteFromClipboard();
+    setReceipt(text);
+    Toast.show(`Pasted receipts`, { duration: Toast.durations.SHORT });
+  };
 
   const handleStatusClose = () => {
     setStatus({
@@ -55,12 +62,14 @@ const Receipt = () => {
       action: { callback() {} },
     });
     try {
-      const expenses = await parseReceipts(" " + receipt);
+      const data = await parseReceipts(" " + receipt);
       setCollections(null);
-      setExpenses(expenses);
       setCollectionSelected(
-        new Set(Array.from({ length: expenses.length }, (_, i) => i))
+        new Set(
+          Array.from({ length: data.length }, (_, i) => i + expenses.length)
+        )
       );
+      setExpenses((prev) => prev.concat(data));
 
       router.replace("/expenses/edit/main");
     } catch (error) {
@@ -104,6 +113,7 @@ const Receipt = () => {
             <View className=" relative ">
               <InputField
                 name="receipt"
+                value={receipt}
                 showLabel={false}
                 placeholder="Paste one or more receipts..."
                 handleChange={handleChange}

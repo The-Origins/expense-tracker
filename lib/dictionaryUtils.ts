@@ -26,6 +26,19 @@ export const getDictionaryKeywords = async (
   return results;
 };
 
+export const getDictionaryItems = async (
+  type: "keywords" | "recipients",
+  search?: string,
+  page: number = 1,
+  limit: number = 5
+) => {
+  const offset = (page - 1) * limit;
+  const results: DictionaryItem[] = await db.getAllAsync(
+    `SELECT * FROM ${type === "recipients" ? "dictionary" : "keywords"} ${search ? `WHERE ${type === "recipients" ? "recipient" : "keyword"} LIKE '%${search}%' OR category LIKE '%${search}%' OR title LIKE '%${search}%'` : ""} ORDER BY keyword DESC LIMIT ${limit} OFFSET ${offset}`
+  );
+  return results;
+};
+
 export const parseData = (
   data: {
     recipients: DictionaryItem[];
@@ -87,6 +100,24 @@ export const parseData = (
   return { filtered, ids };
 };
 
+export const getDictionaryCollections = async () => {
+  const collections = (await db.getAllAsync(
+    `SELECT * FROM collections WHERE name IN ("keywords", "recipients")`
+  )) as { name: "keywords" | "recipients"; count: number }[];
+  console.log(collections);
+
+  return collections.reduce(
+    (obj, collection) => {
+      obj[collection.name] = collection.count;
+      return obj;
+    },
+    {} as {
+      keywords: number;
+      recipients: number;
+    }
+  );
+};
+
 export const updateDictionaryItem = async (
   item: Partial<DictionaryItem>,
   type: "keyword" | "recipient",
@@ -94,13 +125,19 @@ export const updateDictionaryItem = async (
 ) => {
   item.id = item.id || nanoid();
   if (mode === "add") {
-    await db.runAsync(
-      `INSERT OR IGNORE INTO ${type === "keyword" ? "keywords" : "dictionary"} (id, ${type}, title, category) VALUES (?, ?, ?, ?)`,
-      item.id,
-      item[type] || null,
-      item.title || null,
-      item.category || null
-    );
+    await Promise.all([
+      db.runAsync(
+        `INSERT OR IGNORE INTO ${type === "keyword" ? "keywords" : "dictionary"} (id, ${type}, title, category) VALUES (?, ?, ?, ?)`,
+        item.id,
+        item[type] || null,
+        item.title || null,
+        item.category || null
+      ),
+      db.runAsync(
+        `UPDATE collections SET count = count + 1 WHERE name = ? `,
+        type === "keyword" ? "keywords" : "recipients"
+      ),
+    ]);
   } else {
     await db.runAsync(
       `UPDATE ${type === "keyword" ? "keywords" : "dictionary"} SET ${Object.keys(item).map((key) => `${key} = ?`)} WHERE id = '${item.id}'`,
@@ -111,12 +148,18 @@ export const updateDictionaryItem = async (
 };
 
 export const deleteDictionaryItems = async (
-  keywordSelected: Set<string>,
-  recipientSelected: Set<string>
+  selected: Set<string>,
+  type: "keywords" | "recipients"
 ) => {
-  const query = `
-  ${recipientSelected.size ? `DELETE FROM dictionary WHERE id IN (${[...recipientSelected].map((id) => `'${id}'`)});` : ""}
-  ${keywordSelected.size ? `DELETE FROM keywords WHERE id IN (${[...keywordSelected].map((id) => `'${id}'`)});` : ""}
-  `;
-  await db.execAsync(query);
+  const ids = [...selected];
+  await Promise.all([
+    db.runAsync(
+      `DELETE FROM ${type === "recipients" ? "dictionary" : "keywords"} WHERE id IN (?${`, ?`.repeat(ids.length - 1)}) `,
+      ids
+    ),
+    db.runAsync(
+      `UPDATE collections SET count = count - ${ids.length} WHERE name = ? `,
+      type
+    ),
+  ]);
 };
